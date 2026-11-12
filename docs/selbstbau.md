@@ -9,16 +9,29 @@
 - **Versorgung:** über die USB-Buchse des DevKits (5-V-Netzteil). Nicht aus dem Bus versorgen, weil das
   bei Nachbauten mehrfach nicht stabil lief.
 
-## Pinbelegung (EMS-ESP Board-Profil „Custom“)
+## Pinbelegung: EMS-ESP Board-Profil „NODEMCU“
 
-| Funktion | GPIO | Beschriftung DevKit | Warum |
-|---|---|---|---|
-| EMS RX (vom Interface `RX_OUT`) | **GPIO16** | `RX2` | kein Strapping-Pin, Hardware-UART2 |
-| EMS TX (zum Interface `TX_IN`) | **GPIO17** | `TX2` | kein Strapping-Pin, Hardware-UART2 |
-| 3V3 für den Komparator | 3V3 | `3V3` | LM393 läuft an 3,3 V |
-| GND | GND | `GND` | |
+Das Profil **NODEMCU** (NodeMCU 32S) passt direkt zum DevKit V1. Es braucht keinen Developer-Mode
+und kein Custom-Profil.
 
-Diese Pins nicht verwenden: GPIO0, 2, 12 und 15 (Strapping-Pins), GPIO1 und 3 (USB-Seriell), GPIO6–11 (Flash).
+| Funktion | GPIO | Beschriftung DevKit |
+|---|---|---|
+| EMS RX (vom Interface `RX_OUT`) | **GPIO23** | `D23` |
+| EMS TX (zum Interface `TX_IN`) | **GPIO5** | `D5` |
+| LED | GPIO2 | onboard (blau) |
+| 3V3 für den Komparator | 3V3 | `3V3` |
+| GND | GND | `GND` |
+
+Nicht `RX0`/`TX0` verwenden, die hängen am USB-Chip.
+
+Einstellungen in EMS-ESP:
+- Settings → Application → Board Profile: **NODEMCU**
+- EMS Tx Mode: **EMS+** (der RC310 ist ein EMS2.0/EMS+-Gerät), alternativ **Auto**
+- EMS Bus ID: Standard **Gateway 2 (0x49)** lassen
+- Erstinbetriebnahme mit **Read only**
+
+Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile. Firmware-Standard ist RX 23 / TX 5
+(`src/core/default_settings.h`).
 
 ## Bekannte Eckdaten des Referenzdesigns (bbqkees EMS-Wiki)
 
@@ -39,7 +52,7 @@ Diese Pins nicht verwenden: GPIO0, 2, 12 und 15 (Strapping-Pins), GPIO1 und 3 (U
 
 1. RX-Stufe aufbauen und mit dem Multimeter prüfen: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und
    nie über 3,3 V.
-2. EMS-ESP flashen (Web-Installer), Board-Profil „Custom“ wählen, RX=16, TX=17 eintragen, **Read only** aktivieren.
+2. EMS-ESP flashen (Web-Installer, Profil `s_4M`), Board-Profil **NODEMCU** wählen, **Read only** aktivieren.
 3. An den RC310-Sockel parallel anklemmen (siehe `anschluss.md`) und die Geräteliste prüfen.
 4. Erst danach die TX-Stufe ergänzen und Read only abschalten.
 
@@ -48,3 +61,4 @@ Diese Pins nicht verwenden: GPIO0, 2, 12 und 15 (Strapping-Pins), GPIO1 und 3 (U
 - bbqkees EMS-Wiki, EMS Interface: https://github.com/bbqkees/EMS-Wiki/blob/master/Documentation/EMS%20Interface/README.md
 - rocksolidsr/esp-ems-board (ESP8266-Variante, BOM): https://github.com/rocksolidsr/esp-ems-board
 - EMS-ESP32: https://github.com/emsesp/EMS-ESP32
+- EMS-ESP-Doku: https://docs.emsesp.org/Configuring/ und https://docs.emsesp.org/Installing/
