@@ -174,3 +174,31 @@ Zusätzliches Bauteil: 1× Stiftleiste 2-polig + 1× Jumper (JP1).
 - Die GND des ESP32 ist mit der Bus-Minusseite verbunden; galvanisch getrennt ist hier nichts. Das ist unkritisch,
   solange das USB-Netzteil ein normales, isoliertes Steckernetzteil ist.
 - Bricht die Kommunikation des RC310 zusammen: Gateway abklemmen, und alles läuft wie vorher.
+
+---
+
+## 8. Lochraster-Plan
+
+- `lochraster_bestueckung.svg`: Draufsicht auf die Bauteilseite
+- `lochraster_loetseite.svg`: Lötseite, gespiegelt (so liegt die Platine beim Löten vor dir)
+
+Die Pläne erzeugt `tools/lochraster.py` (`python3 tools/lochraster.py docs`). Das Skript prüft die Verdrahtung
+automatisch gegen die Netzliste oben: alle Netze zusammenhängend, keine Verbindung zwischen fremden Netzen.
+
+**Platine:** mindestens 36 × 22 Löcher (Raster 2,54 mm, ca. 9 × 6 cm). Koordinaten (x, y) zählen von oben links
+auf der Bauteilseite, die Achsen sind beschriftet.
+
+**Drahtbrücken auf der Bauteilseite** (isolierter Draht, im Plan als Bogen gezeichnet):
+
+| Netz | von | nach |
+|---|---|---|
+| NA | (22, 7) | (20, 7) |
+| U_REF | (22, 12) | (20, 12) |
+| U_REF | (28, 14) | (24, 14) |
+| LM393 Pin 7 / Basis Q1 | (31, 11) | (31, 9) |
+| RX_OUT | (33, 9) | (33, 7) |
+
+Alle übrigen Verbindungen liegen auf der Lötseite als blanker Draht oder Lötbrücke entlang der Lochreihen.
+
+**Vor dem ersten Einschalten** jedes Netz mit dem Durchgangsprüfer abklappern, besonders GND, VBUS und 3V3.
+Außerdem prüfen, dass zwischen VBUS, GND und 3V3 kein Durchgang besteht.
