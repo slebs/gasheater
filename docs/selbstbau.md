@@ -49,11 +49,11 @@ Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile. Firmware-Stan
 
 ## Ablauf
 
-1. RX-Stufe aufbauen und mit dem Multimeter prüfen: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und
+1. Komplette Platine (RX + TX, JP1 gezogen) aufbauen und mit dem Multimeter prüfen: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und
    nie über 3,3 V.
 2. EMS-ESP flashen (Web-Installer, Profil `s_4M`), Board-Profil **NODEMCU** wählen, **Read only** aktivieren.
 3. An den RC310-Sockel parallel anklemmen (siehe `anschluss.md`) und die Geräteliste prüfen.
-4. Erst danach die TX-Stufe ergänzen und Read only abschalten.
+4. Erst danach JP1 stecken und Read only abschalten.
 
 ## Quellen
 

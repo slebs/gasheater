@@ -57,7 +57,7 @@ Netznamen: `L1`/`L2` = Busklemmen, `VBUS` = Plus nach dem Gleichrichter, `NA` = 
 | R6 | 4,7 k | `VCC` (3V3) | LM393 **Pin 1** (OUT A) | Pull-up, **an 3V3, nicht an 5 V** |
 | R7 | 4,7 k | LM393 **Pin 1** | **RX_OUT → ESP32 GPIO23 (D23)** | |
 
-### TX-Stufe (Komparator B = LM393 Pins 5/6/7). Erst in Stufe 2 bestücken
+### TX-Stufe (Komparator B = LM393 Pins 5/6/7)
 
 | Bauteil | Wert | von | nach | Hinweis |
 |---|---|---|---|---|
@@ -66,7 +66,7 @@ Netznamen: `L1`/`L2` = Busklemmen, `VBUS` = Plus nach dem Gleichrichter, `NA` = 
 | C4 | 10 nF | LM393 **Pin 6** | `GND` | |
 | R8 | 4,7 k | `VCC` (3V3) | LM393 **Pin 7** (OUT B) = Basis Q1 | |
 | Q1 | BC547B | B = Pin 7, E = `GND`, C = Knoten `TXC` | | NPN, TO-92 |
-| R9 | 220 Ω, **1 W** | `VBUS` | `TXC` | ersetzt 4×910 Ω parallel (= 227 Ω). **Zulässig 210–250 Ω** |
+| R9 | 220 Ω, **1 W** | `VBUS` (über JP1) | `TXC` | ersetzt 4×910 Ω parallel (= 227 Ω). **Zulässig 210–250 Ω** |
 | C5 | 1,5 nF | `TXC` | `GND` | |
 
 ### Versorgung LM393
@@ -100,21 +100,22 @@ Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest 
 | 1 | IC | **LM393N** (DIP-8) + IC-Sockel | Komparatoren A und B |
 | 5 | Schottky-Diode | **BAT46** (DO-35) | D1–D5 |
 | 1 | Diode | **1N4148** | D6 |
-| 1 | Transistor | **BC547B** (oder BC547C / BC548B) | Q1 (Stufe 2) |
+| 1 | Transistor | **BC547B** (oder BC547C / BC548B) | Q1 |
 | 2 | Widerstand | 10 kΩ | R1, R4 |
 | 1 | Widerstand | 360 Ω | R2 |
 | 1 | Widerstand | 47 kΩ | R3 |
 | 1 | Widerstand | 100 kΩ | R5 |
 | 3 | Widerstand | 4,7 kΩ | R6, R7, R8 |
-| 1 | Widerstand | **220 Ω, 1 W** (alternativ 4× 910 Ω 0,25 W parallel) | R9 (Stufe 2) |
+| 1 | Widerstand | **220 Ω, 1 W** (alternativ 4× 910 Ω 0,25 W parallel) | R9 |
 | 1 | Kondensator | 68 pF Keramik | C1 |
 | 1 | Kondensator | 10 µF Keramik X7R (oder Elko ≥ 16 V) | C2 |
 | 1 | Kondensator | 1 nF Keramik | C3 |
-| 1 | Kondensator | 10 nF Keramik | C4 (Stufe 2) |
-| 1 | Kondensator | 1,5 nF Keramik | C5 (Stufe 2) |
+| 1 | Kondensator | 10 nF Keramik | C4 |
+| 1 | Kondensator | 1,5 nF Keramik | C5 |
 | 1 | Kondensator | 100 nF Keramik | C6 |
 | 2 | Induktivität | 4,7 µH axial (optional) | L1, L2 |
 | 2 | Polyfuse | ~300 mA (optional) | F1, F2 |
+| 1 | Stiftleiste 2-pol. + Jumper | | JP1 (TX ein/aus) |
 | 1 | Schraubklemme | 2-polig, RM 5,08 | Busanschluss |
 | 2 | Buchsenleiste | 1×15 (oder passend zum DevKit) | ESP32 steckbar |
 | 1 | Lochrasterplatine | ca. 7×9 cm | |
@@ -124,25 +125,22 @@ Die Kosten liegen bei ca. 5–8 € plus Versand, z. B. bei Reichelt oder in ein
 
 ---
 
-## 4. Aufbau in zwei Stufen
+## 4. Aufbau: alles auf einmal (RX + TX)
 
-### Stufe 1: nur RX (Mitlesen)
+Die ganze Platine wird in einem Durchgang bestückt: Eingang, RX- und TX-Stufe, LM393, C6.
 
-Bestücken: Eingang (F1/F2, L1/L2, C1, D1–D5), RX-Stufe (R1–R7, D6, C2, C3), LM393 + C6.
+Damit TX beim ersten Test trotzdem sicher aus ist, gibt es **zwei Sicherungen**:
 
-Den **unbenutzten Komparator B festlegen**, damit er nicht schwingt:
-- Pin 5 (IN+ B) → GND
-- Pin 6 (IN− B) → 3V3
-- Pin 7 offen lassen
+1. **Jumper JP1 in Reihe zu R9.** Dafür eine 2-polige Stiftleiste mit Jumper zwischen `VBUS` und R9 setzen
+   (also `VBUS` → JP1 → R9 → `TXC`).
+   - **Jumper gezogen:** Der Transistor kann keinen Strom aus dem Bus ziehen, die Platine liest nur mit.
+   - **Jumper gesteckt:** TX aktiv.
+2. **Software:** In EMS-ESP „Read only“ einschalten. Dann sendet der ESP32 gar nicht.
 
-Für Stufe 2 werden diese beiden Brücken wieder entfernt.
+Ablauf: zuerst mit **gezogenem Jumper und Read only** testen. Wenn Telegramme ankommen, den Jumper stecken
+und Read only ausschalten.
 
-### Stufe 2: TX dazu (Schreiben)
-
-Brücken an Pin 5/6 entfernen und Pin 5 → `U_REF`, Pin 6 → TX_IN (GPIO5) verdrahten.
-C4, R8, Q1, R9, C5 bestücken.
-
----
+Zusätzliches Bauteil: 1× Stiftleiste 2-polig + 1× Jumper (JP1).
 
 ## 5. Prüfen vor dem ersten Anschluss
 
@@ -163,10 +161,10 @@ C4, R8, Q1, R9, C5 bestücken.
 ## 6. EMS-ESP einstellen
 
 - Board Profile: **NODEMCU** (RX GPIO23, TX GPIO5)
-- **Read only: an** (Stufe 1)
+- **Read only: an** beim ersten Test (JP1 gezogen)
 - EMS Tx Mode: **EMS+** (RC310 = EMS2.0) oder **Auto**
 - Im Dashboard prüfen: Es werden Telegramme empfangen, und RC310 und Station tauchen unter „Devices“ auf.
-- Stufe 2: Read only aus und in Console oder Dashboard auf **Tx-Fehler** achten.
+- Danach: JP1 stecken, Read only aus und in Console oder Dashboard auf **Tx-Fehler** achten.
 
 ---
 
