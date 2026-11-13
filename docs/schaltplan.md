@@ -177,28 +177,50 @@ Zusätzliches Bauteil: 1× Stiftleiste 2-polig + 1× Jumper (JP1).
 
 ---
 
-## 8. Lochraster-Plan
+## 8. Lochraster-Plan (ESP32 DevKit mit auf der Platine)
 
-- `lochraster_bestueckung.svg`: Draufsicht auf die Bauteilseite
-- `lochraster_loetseite.svg`: Lötseite, gespiegelt (so liegt die Platine beim Löten vor dir)
+Das DevKit steckt auf **zwei Buchsenleisten 1×15**, die auf die Lochrasterplatine gelötet werden. So bleibt
+es abnehmbar, z. B. zum Flashen am Mac. Die Bus-Elektronik sitzt rechts daneben, die Busklemme J1 am rechten Rand.
 
-Die Pläne erzeugt `tools/lochraster.py` (`python3 tools/lochraster.py docs`). Das Skript prüft die Verdrahtung
-automatisch gegen die Netzliste oben: alle Netze zusammenhängend, keine Verbindung zwischen fremden Netzen.
+**Zuerst den Reihenabstand deines DevKits prüfen.** Bei Klonen gibt es zwei Varianten. Leg das Board auf die Lochrasterplatine
+und zähl die freien Löcher zwischen den beiden Stiftreihen:
 
-**Platine:** mindestens 36 × 22 Löcher (Raster 2,54 mm, ca. 9 × 6 cm). Koordinaten (x, y) zählen von oben links
-auf der Bauteilseite, die Achsen sind beschriftet.
+| freie Löcher dazwischen | Abstand | Plan |
+|---|---|---|
+| 9 | 25,40 mm | `lochraster_esp_25-40mm_bestueckung.svg` / `…_loetseite.svg` |
+| 8 | 22,86 mm | `lochraster_esp_22-86mm_bestueckung.svg` / `…_loetseite.svg` |
 
-**Drahtbrücken auf der Bauteilseite** (isolierter Draht, im Plan als Bogen gezeichnet):
+Beide Pläne sind bis auf die Lage der Bauteile (bei 22,86 mm eine Spalte weiter links) identisch.
+
+- **Bestückungsseite**: Draufsicht, Bauteile von oben
+- **Lötseite**: gespiegelt, so liegt die Platine beim Löten vor dir
+
+**Platine:** mindestens 47 × 24 Löcher (ca. 12 × 6 cm). Eine Standardplatine 160 × 100 mm reicht.
+Die Koordinaten (x, y) zählen von oben links auf der Bauteilseite, die Achsen sind beschriftet.
+
+**Genutzte ESP32-Pins** (im Plan gold, alle in der rechten Stiftreihe): `D23` (RX), `D5` (TX), `GND`, `3V3`.
+Die übrigen Pins bekommen nur Buchsen und keine Verbindung.
+
+**Drahtbrücken auf der Bauteilseite** (isolierter Draht, im Plan als Bogen), Variante 25,40 mm:
 
 | Netz | von | nach |
 |---|---|---|
-| NA | (22, 7) | (20, 7) |
-| U_REF | (22, 12) | (20, 12) |
-| U_REF | (28, 14) | (24, 14) |
-| LM393 Pin 7 / Basis Q1 | (31, 11) | (31, 9) |
-| RX_OUT | (33, 9) | (33, 7) |
+| U_REF | (18, 9) | (20, 9) |
+| RX_OUT | (12, 10) | (12, 12) |
+| RX_OUT | (12, 16) | (12, 18) |
+| LM393 Pin 7 / Basis Q1 | (15, 12) | (15, 14) |
+| 3V3 | (17, 17) | (17, 15) |
+| LM393 Pin 2 | (22, 8) | (22, 10) |
+| LM393 Pin 2 | (21, 6) | (21, 8) |
+
+Bei der Variante 22,86 mm liegen alle x-Werte um 1 niedriger.
 
 Alle übrigen Verbindungen liegen auf der Lötseite als blanker Draht oder Lötbrücke entlang der Lochreihen.
+Unter dem DevKit verlaufen keine Leitungen.
 
-**Vor dem ersten Einschalten** jedes Netz mit dem Durchgangsprüfer abklappern, besonders GND, VBUS und 3V3.
-Außerdem prüfen, dass zwischen VBUS, GND und 3V3 kein Durchgang besteht.
+Die Pläne erzeugt `tools/lochraster.py` (`python3 tools/lochraster.py docs 10` bzw. `… docs 9`). Das Skript
+verlegt die Leitungen und prüft sie automatisch gegen die Netzliste oben: alle Netze zusammenhängend,
+keine Verbindung zwischen fremden Netzen.
+
+**Vor dem ersten Einschalten** (ESP32 noch nicht gesteckt) jedes Netz mit dem Durchgangsprüfer abklappern.
+Zwischen VBUS, GND und 3V3 darf kein Durchgang sein.

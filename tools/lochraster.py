@@ -4,15 +4,19 @@
 Platziert die Bauteile auf einem 2,54-mm-Raster und verlegt die Verbindungen
 automatisch (Lee-Routing, nur waagerecht/senkrecht, auf der Lötseite). Prüft
 anschließend die Netzliste gegen docs/schaltplan.md: jedes Netz zusammenhängend,
-keine Verbindung zwischen verschiedenen Netzen. Erzeugt zwei SVGs:
-  docs/lochraster_bestueckung.svg  (Draufsicht Bauteilseite)
-  docs/lochraster_loetseite.svg    (Lötseite, gespiegelt)
+keine Verbindung zwischen verschiedenen Netzen. Das ESP32 DevKit V1 sitzt mit auf der Platine.
+Aufruf: python3 tools/lochraster.py docs <GAP>   (GAP = Reihenabstand in Löchern, 10 oder 9)
+Erzeugt je Variante zwei SVGs:
+  docs/lochraster_esp_<mm>_bestueckung.svg  (Draufsicht Bauteilseite)
+  docs/lochraster_esp_<mm>_loetseite.svg    (Lötseite, gespiegelt)
 """
 import heapq
 import sys
 from collections import defaultdict
 
-W, H = 36, 22  # Löcher (x 0..W-1, y 0..H-1)
+# Abstand der beiden Stiftreihen des ESP32-DevKits in Löchern (10 = 25,4 mm, 9 = 22,86 mm)
+GAP = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+W, H = 0, 22  # Breite wird nach der Platzierung berechnet
 P = 20         # px pro Raster im SVG
 M = 40         # Rand im SVG
 
@@ -57,12 +61,31 @@ part("res", "R7", "4k7", (27, 4, "P1", ""), (31, 4, "RXO", ""))
 part("ccap", "C4", "10n", (32, 13, "P6", ""), (32, 15, "GND", ""))
 part("res", "R8", "4k7", (29, 13, "VCC", ""), (29, 17, "P7", ""))
 part("to92", "Q1", "BC547B", (30, 19, "TXC", "C"), (31, 19, "P7", "B"), (32, 19, "GND", "E"))
-part("jumper", "JP1", "TX ein", (23, 1, "VBUS", "1"), (24, 1, "JPX", "2"))
-part("res1w", "R9", "220R 1W", (24, 20, "JPX", ""), (29, 20, "TXC", ""))
+part("jumper", "JP1", "TX ein", (21, 21, "VBUS", "1"), (22, 21, "JPX", "2"))
+part("res1w", "R9", "220R 1W", (24, 21, "JPX", ""), (29, 21, "TXC", ""))
 part("ccap", "C5", "1,5n", (26, 19, "TXC", ""), (28, 19, "GND", ""))
-# Anschluss zum ESP32 (Dupont-Kabel)
-part("header", "J2", "ESP32",
-     (34, 8, "VCC", "3V3"), (34, 9, "GND", "GND"), (34, 10, "RXO", "D23"), (34, 11, "P6", "D5"))
+# Schaltung um 180° drehen (Busklemme nach rechts, LM393-Seite zum ESP32 hin).
+# Drehung statt Spiegelung, damit IC- und Transistor-Pinbelegung physikalisch stimmen.
+EX0 = 1                    # linke Stiftreihe ESP32
+EX1 = EX0 + GAP            # rechte Stiftreihe ESP32
+OFF = EX1 + 2              # Schaltung beginnt 2 Löcher rechts der ESP-Stiftreihe
+SHIFT = 2                  # Platz am oberen Rand für Q1/R9-Beschriftung
+for p in parts:
+    p["pins"] = [(OFF + (33 - x), (H - 1) - y + SHIFT, n, l) for x, y, n, l in p["pins"]]
+H += SHIFT
+W = max(x for p in parts for x, *_ in p["pins"]) + 2
+
+# ESP32 DevKit V1 (30 Pins), Antenne oben, USB unten, Bauteilseite nach oben
+ESP_L = ["EN", "VP", "VN", "D34", "D35", "D32", "D33", "D25", "D26", "D27", "D14", "D12", "D13", "GND", "VIN"]
+ESP_R = ["D23", "D22", "TX0", "RX0", "D21", "D19", "D18", "D5", "TX2", "RX2", "D4", "D2", "D15", "GND", "3V3"]
+EY0 = 4
+USE = {"D23": "RXO", "D5": "P6", "GND": "GND", "3V3": "VCC"}
+esp_pins = []
+for i, lbl in enumerate(ESP_L):
+    esp_pins.append((EX0, EY0 + i, f"NC:L{lbl}", "L" + lbl))
+for i, lbl in enumerate(ESP_R):
+    esp_pins.append((EX1, EY0 + i, USE.get(lbl, f"NC:R{lbl}"), lbl))
+part("esp", "ESP", "ESP32 DevKit V1", *esp_pins)
 
 # Soll-Netzliste (aus docs/schaltplan.md), unabhängig von der Platzierung notiert
 EXPECTED = {
@@ -71,15 +94,15 @@ EXPECTED = {
     "NL1": {"L1.2", "C1.1", "D1.A", "D2.K"},
     "NL2": {"L2.2", "C1.2", "D3.A", "D4.K"},
     "VBUS": {"D1.K", "D3.K", "D5.K", "R1.1", "JP1.1"},
-    "GND": {"D2.A", "D4.A", "D5.A", "D6.K", "R5.2", "U1.4", "C6.2", "C4.2", "Q1.E", "C5.2", "J2.GND"},
+    "GND": {"D2.A", "D4.A", "D5.A", "D6.K", "R5.2", "U1.4", "C6.2", "C4.2", "Q1.E", "C5.2", "ESP.GND"},
     "NA": {"R1.2", "R2.1", "C2.1", "C3.1"},
     "UREF": {"R2.2", "D6.A", "R3.1", "R4.1", "U1.5"},
     "P3": {"C2.2", "R3.2", "U1.3"},
     "P2": {"C3.2", "R4.2", "R5.1", "U1.2"},
     "P1": {"U1.1", "R6.2", "R7.1"},
-    "RXO": {"R7.2", "J2.D23"},
-    "VCC": {"U1.8", "C6.1", "R6.1", "R8.1", "J2.3V3"},
-    "P6": {"U1.6", "C4.1", "J2.D5"},
+    "RXO": {"R7.2", "ESP.D23"},
+    "VCC": {"U1.8", "C6.1", "R6.1", "R8.1", "ESP.3V3"},
+    "P6": {"U1.6", "C4.1", "ESP.D5"},
     "P7": {"U1.7", "R8.2", "Q1.B"},
     "TXC": {"Q1.C", "R9.2", "C5.1"},
     "JPX": {"JP1.2", "R9.1"},
@@ -101,7 +124,8 @@ for p in parts:
 
 got = defaultdict(set)
 for (x, y), (net, pid) in pinmap.items():
-    got[net].add(pid)
+    if not net.startswith("NC:"):
+        got[net].add(pid)
 if dict(got) != EXPECTED:
     for n in sorted(set(got) | set(EXPECTED)):
         if got.get(n) != EXPECTED.get(n):
@@ -156,6 +180,9 @@ def route(net, src_set, dst, occ):
                     continue
                 if xy in jump_ends or (jx, jy) in jump_ends:
                     continue
+                # Brücken brauchen eigene Löcher (nicht in einem Bauteil-Pin-Loch)
+                if xy in pinmap or (jx, jy) in pinmap:
+                    continue
                 nd, k, jmp = d + JUMP_COST + turn, ((jx, jy), (dx, dy)), True
             if nd < dist.get(k, 1e9):
                 dist[k] = nd
@@ -171,6 +198,10 @@ def try_order(order):
     global jump_ends
     jump_ends = set()
     occ = {xy: n for xy, (n, _) in pinmap.items()}
+    # Sperrfläche unter dem ESP32-DevKit: keine Leitungen unter dem Board
+    for kx in range(0, EX1):
+        for ky in range(H):
+            occ.setdefault((kx, ky), "KEEP")
     wires = defaultdict(list)   # net -> list of hole-paths (nur Lötseite, zusammenhängend)
     jumps = []                  # (net, a, b) Drahtbrücken oben
     cost = 0
@@ -204,7 +235,7 @@ def try_order(order):
 
 
 jump_ends = set()
-random.seed(int(sys.argv[2]) if len(sys.argv) > 2 else 1)
+random.seed(1)
 best = None
 base = ["GND", "VBUS", "VCC"]
 for it in range(400):
@@ -389,7 +420,7 @@ def svg(mirror):
             # Beschriftung
             if not mirror:
                 lab = f'{p["ref"]} {p["value"]}'
-                below = p["ref"] in ("R9",)
+                below = False
                 if horiz:
                     ty = cy + h_ / 2 + 10 if below else cy - h_ / 2 - 3
                     g.append(f'<text x="{cx}" y="{ty}" font-size="9" text-anchor="middle" fill="#111">{lab}</text>')
@@ -400,12 +431,17 @@ def svg(mirror):
             y0, y1_ = min(ys), max(ys)
             g.append(f'<rect x="{x0 + 5}" y="{y0 - 12}" width="{x1_ - x0 - 10}" height="{y1_ - y0 + 24}" rx="3" fill="#222" stroke="#000"/>')
             nx_ = (x0 + x1_) / 2
-            g.append(f'<path d="M {nx_ - 6} {y0 - 12} A 6 6 0 0 0 {nx_ + 6} {y0 - 12}" fill="#666"/>')
+            p1x, p1y = pts[0]
+            top = p1y == y0          # Kerbe an der Seite von Pin 1
+            ny = y0 - 12 if top else y1_ + 12
+            sweep = 0 if top else 1
+            g.append(f'<path d="M {nx_ - 6} {ny} A 6 6 0 0 {sweep} {nx_ + 6} {ny}" fill="#666"/>')
             if not mirror:
-                g.append(f'<circle cx="{x0 + 12}" cy="{y0 - 4}" r="2.5" fill="#888"/>')
+                g.append(f'<circle cx="{p1x + (7 if p1x == x0 else -7)}" cy="{p1y + (-4 if not top else 4)}" r="2.5" fill="#bbb"/>')
                 g.append(f'<text x="{nx_}" y="{(y0 + y1_) / 2 + 4}" font-size="10" fill="#fff" text-anchor="middle" '
                          f'transform="rotate(-90 {nx_} {(y0 + y1_) / 2})">LM393</text>')
-                g.append(f'<text x="{nx_}" y="{y0 - 18}" font-size="9" text-anchor="middle">U1 (Kerbe oben)</text>')
+                ty = y0 - 18 if top else y1_ + 26
+                g.append(f'<text x="{nx_}" y="{ty}" font-size="9" text-anchor="middle">U1 (Kerbe {"oben" if top else "unten"}, Pin 1 ●)</text>')
             for (a, b), (_, _, _, lbl) in zip(pts, p["pins"]):
                 if not mirror:
                     side = -1 if a == x0 else 1
@@ -413,12 +449,31 @@ def svg(mirror):
         elif k == "to92":
             x0, x1_ = min(xs), max(xs)
             y0 = ys[0]
-            # flache Seite nach unten (zum Betrachter = Richtung +y)
-            g.append(f'<path d="M {x0 - 6} {y0 + 6} L {x1_ + 6} {y0 + 6} A {(x1_ - x0) / 2 + 6} 14 0 0 0 {x0 - 6} {y0 + 6} Z" fill="#222"/>')
+            bx = [q[0] for q in p["pins"]]
+            fs = 1 if bx[0] < bx[2] else -1   # flache Seite: +1 = unten, -1 = oben
+            r = (x1_ - x0) / 2 + 6
+            g.append(f'<path d="M {x0 - 6} {y0 + 6 * fs} L {x1_ + 6} {y0 + 6 * fs} A {r} 14 0 0 {0 if fs > 0 else 1} {x0 - 6} {y0 + 6 * fs} Z" fill="#222"/>')
             if not mirror:
                 for (a, b), (_, _, _, lbl) in zip(pts, p["pins"]):
-                    g.append(f'<text x="{a}" y="{b + 17}" font-size="8" text-anchor="middle">{lbl}</text>')
-                g.append(f'<text x="{x1_ + 10}" y="{y0 + 4}" font-size="9">Q1 BC547B</text>')
+                    g.append(f'<text x="{a}" y="{b + (17 if fs > 0 else -11)}" font-size="8" text-anchor="middle">{lbl}</text>')
+                g.append(f'<text x="{x0 - 10}" y="{y0 + 3}" font-size="9" text-anchor="end">Q1</text>')
+        elif k == "esp":
+            x0, x1_ = min(xs), max(xs)
+            y0, y1_ = min(ys), max(ys)
+            g.append(f'<rect x="{x0 - 12}" y="{y0 - 3 * P}" width="{x1_ - x0 + 24}" height="{y1_ - y0 + 5 * P}" rx="4" '
+                     f'fill="#1e3a8a" fill-opacity="{0.08 if mirror else 0.18}" stroke="#1e3a8a" stroke-width="1.5" stroke-dasharray="6 3"/>')
+            for (a, b), (_, _, net, lbl) in zip(pts, p["pins"]):
+                used = not net.startswith("NC:")
+                g.append(f'<rect x="{a - 4}" y="{b - 4}" width="8" height="8" fill="{"#d4af37" if used else "#555"}"/>')
+                if not mirror:
+                    inner = 1 if a == x0 else -1
+                    g.append(f'<text x="{a + inner * 9}" y="{b + 3}" font-size="8" text-anchor="{"start" if inner > 0 else "end"}" '
+                             f'fill="{"#111" if used else "#667"}" font-weight="{"bold" if used else "normal"}">{lbl.lstrip("L") if a == x0 else lbl}</text>')
+            if not mirror:
+                cx = (x0 + x1_) / 2
+                g.append(f'<text x="{cx}" y="{y0 - 2 * P}" font-size="10" text-anchor="middle" font-weight="bold">ESP32 DevKit V1</text>')
+                g.append(f'<text x="{cx}" y="{y0 - 2 * P + 13}" font-size="9" text-anchor="middle">Antenne oben, Chip nach oben</text>')
+                g.append(f'<text x="{cx}" y="{y1_ + 1.6 * P}" font-size="9" text-anchor="middle">USB unten</text>')
         elif k in ("terminal", "header"):
             x0, x1_ = min(xs), max(xs)
             y0, y1_ = min(ys), max(ys)
@@ -451,14 +506,16 @@ def svg(mirror):
         yy += 15
     yy += 8
     notes = [
-        "Raster 2,54 mm, Platine ≥ 36 × 22 Löcher (ca. 9 × 6 cm).",
+        f"Raster 2,54 mm, Platine ≥ {W} × {H} Löcher (ca. {W * 0.254:.1f} × {H * 0.254:.1f} cm).",
+        f"ESP32-Stiftreihen: {GAP} Raster Abstand = {GAP * 2.54:.2f} mm ({GAP - 1} freie Löcher dazwischen).",
+        "ESP32 auf 2 Buchsenleisten 1×15 stecken (nicht direkt einlöten).",
         "Dioden: schwarzer Ring = Kathode (K).",
-        "U1: Kerbe/Punkt oben links = Pin 1. Sockel verwenden!",
-        "Q1 BC547B: flache Seite unten, Pins C–B–E von links.",
+        "U1: Kerbe/Punkt = Pin 1 wie gezeichnet. Sockel verwenden!",
+        "Q1 BC547B: flache Seite wie gezeichnet, Pins C/B/E beschriftet.",
         "JP1 gezogen = TX aus (nur Mitlesen).",
         "R9 = 220 Ω 1 W (oder 4×910 Ω parallel).",
         "C2 10 µF: Keramik. Elko: Plus an NA (Seite R1).",
-        "J2 mit Dupont-Kabeln an ESP32: 3V3, GND, D23, D5.",
+        "Genutzte ESP32-Pins (gold): 3V3, GND, D23 (RX), D5 (TX).",
         "Gebogene Linien = isolierte Drahtbrücke auf der Bauteilseite.",
         "Vor Inbetriebnahme: Durchgangsprüfung jedes Netzes.",
     ]
@@ -471,6 +528,7 @@ def svg(mirror):
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "docs"
-    open(f"{out}/lochraster_bestueckung.svg", "w").write(svg(False))
-    open(f"{out}/lochraster_loetseite.svg", "w").write(svg(True))
+    tag = f"esp_{GAP * 254 // 100}-{GAP * 254 % 100:02d}mm"
+    open(f"{out}/lochraster_{tag}_bestueckung.svg", "w").write(svg(False))
+    open(f"{out}/lochraster_{tag}_loetseite.svg", "w").write(svg(True))
     print("SVGs geschrieben")

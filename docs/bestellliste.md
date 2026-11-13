@@ -25,7 +25,6 @@ im Artikel kontrollieren.
 | 2 | Festinduktivität 4,7 µH axial | `4,7µH axial` | optional, sonst Drahtbrücke |
 | 1 | Schraubklemme 2-polig RM 5,08 | `AKL 101-02` | |
 | 1 | Stiftleiste 1×2 + Jumper | `Stiftleiste 2,54` / `Jumper 2,54` | JP1 |
-| 1 | Stiftleiste 1×4 | `Stiftleiste 2,54` | J2 zum ESP32 |
-| 1 | Lochrasterplatine ≥ 100 × 75 mm | `Lochraster 100x75` | Lötpunkte, kein Streifenraster |
-| 4 | Dupont-Kabel Buchse–Buchse | `Jumper Kabel female` | J2 ↔ ESP32 |
+| 2 | Buchsenleiste 1×15, RM 2,54 | `Buchsenleiste 15pol` | Sockel für ESP32 DevKit |
+| 1 | Lochrasterplatine 160 × 100 mm | `Lochraster 160x100` | Lötpunkte, kein Streifenraster |
 | – | Schaltdraht verzinnt 0,6 mm + isolierter Draht | `Schaltdraht` | Lötseite + Brücken |
