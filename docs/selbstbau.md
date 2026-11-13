@@ -1,7 +1,6 @@
 # Selbstbau: EMS-Interface + ESP32 DevKit V1
 
-> Status: **Entwurf.** Die Bauteilwerte und die Verdrahtung werden erst eingetragen, wenn sie gegen
-> den Referenzschaltplan (bbqkees EMS-Wiki, Bild) geprüft sind. Nicht nach Gedächtnis aufbauen.
+> Status: Schaltplan, Stückliste und Aufbau siehe **`schaltplan.md`**.
 
 ## Hardware
 

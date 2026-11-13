@@ -1,0 +1,178 @@
+# EMS-Interface: Schaltplan, Stückliste und Aufbau (ESP32, 3,3 V)
+
+Vorlage ist der Schaltplan „EMSBus-UART-Converter“. Das ist das bekannte, aus einem Buderus-Servicekey
+nachgebaute Design, das auch im bbqkees EMS-Wiki verwendet wird.
+Hier wurde es angepasst für:
+
+- **ESP32 DevKit V1**: Die Versorgung ist **3,3 V statt 5 V**. Dann liefert RX_OUT nie mehr als 3,3 V.
+- **Bedrahtete Bauteile** für Lochraster, z. B. BC547B statt BC847B (SMD) und BAT46 statt BAT54S.
+- **Induktivitäten 4,7 µH.** Der Originalplan sagt 4,7 mH; laut bbqkees ist das ein Übertragungsfehler.
+
+---
+
+## 1. Funktionsweise kurz
+
+- **Eingang:** Ein Brückengleichrichter aus 4 Dioden erzeugt aus dem Bus eine Gleichspannung (`VBUS`, ca. 12–17 V).
+  Die Polung des Busses ist damit egal.
+- **RX:** Über 10 k fließt ein kleiner Strom durch 360 Ω und eine 1N4148 nach GND. An der 1N4148
+  entsteht die Referenz `U_REF` (≈ 0,6 V). Wenn der Master die Busspannung moduliert, ändert sich dieser Strom ein wenig.
+  Das Signal wird kapazitiv auf Komparator A gekoppelt, dessen Ausgang an RX_OUT liegt.
+- **TX:** Der ESP32 sendet auf TX_IN. Komparator B schaltet den Transistor, und der zieht über ca. 220 Ω Strom
+  aus dem Bus (Strommodulation; so senden EMS-Slaves). In Ruhe (TX = High) ist der Transistor aus.
+
+---
+
+## 2. Netzliste
+
+Netznamen: `L1`/`L2` = Busklemmen, `VBUS` = Plus nach dem Gleichrichter, `NA` = Knoten nach dem 10-k-Widerstand,
+`U_REF` = Referenz, `VCC` = **3V3 vom ESP32**, `GND` = Minus nach dem Gleichrichter = GND des ESP32.
+
+### Eingang und Gleichrichter
+
+| Bauteil | Wert | von | nach | Hinweis |
+|---|---|---|---|---|
+| F1 | Brücke oder Polyfuse ~300 mA | Klemme 1 | L1a | Im Original „N/A“; eine Drahtbrücke reicht |
+| F2 | Brücke oder Polyfuse ~300 mA | Klemme 2 | L2a | |
+| L1 | 4,7 µH | L1a | `L1` | darf für den ersten Test auch eine Drahtbrücke sein |
+| L2 | 4,7 µH | L2a | `L2` | |
+| C1 | 68 pF | `L1` | `L2` | Keramik |
+| D1 | BAT46 | Anode `L1` | Kathode `VBUS` | |
+| D2 | BAT46 | Anode `GND` | Kathode `L1` | |
+| D3 | BAT46 | Anode `L2` | Kathode `VBUS` | |
+| D4 | BAT46 | Anode `GND` | Kathode `L2` | |
+| D5 | BAT46 | Anode `GND` | Kathode `VBUS` | Schutzdiode, so eingezeichnet |
+
+### RX-Stufe (Komparator A = LM393 Pins 1/2/3)
+
+| Bauteil | Wert | von | nach | Hinweis |
+|---|---|---|---|---|
+| R1 | 10 k | `VBUS` | `NA` | |
+| R2 | 360 Ω | `NA` | `U_REF` | |
+| D6 | 1N4148 | Anode `U_REF` | Kathode `GND` | erzeugt `U_REF` ≈ 0,6 V |
+| C2 | 10 µF | `NA` | LM393 **Pin 3** (IN+ A) | Keramik (X7R) empfohlen. Beim Elko: **Plus an `NA`** |
+| R3 | 47 k | `U_REF` | LM393 **Pin 3** | |
+| C3 | 1 nF | `NA` | LM393 **Pin 2** (IN− A) | Keramik |
+| R4 | 10 k | `U_REF` | LM393 **Pin 2** | |
+| R5 | 100 k | LM393 **Pin 2** | `GND` | |
+| R6 | 4,7 k | `VCC` (3V3) | LM393 **Pin 1** (OUT A) | Pull-up, **an 3V3, nicht an 5 V** |
+| R7 | 4,7 k | LM393 **Pin 1** | **RX_OUT → ESP32 GPIO23 (D23)** | |
+
+### TX-Stufe (Komparator B = LM393 Pins 5/6/7). Erst in Stufe 2 bestücken
+
+| Bauteil | Wert | von | nach | Hinweis |
+|---|---|---|---|---|
+| — | Draht | `U_REF` | LM393 **Pin 5** (IN+ B) | |
+| — | Draht | **TX_IN ← ESP32 GPIO5 (D5)** | LM393 **Pin 6** (IN− B) | |
+| C4 | 10 nF | LM393 **Pin 6** | `GND` | |
+| R8 | 4,7 k | `VCC` (3V3) | LM393 **Pin 7** (OUT B) = Basis Q1 | |
+| Q1 | BC547B | B = Pin 7, E = `GND`, C = Knoten `TXC` | | NPN, TO-92 |
+| R9 | 220 Ω, **1 W** | `VBUS` | `TXC` | ersetzt 4×910 Ω parallel (= 227 Ω). **Zulässig 210–250 Ω** |
+| C5 | 1,5 nF | `TXC` | `GND` | |
+
+### Versorgung LM393
+
+| Bauteil | Wert | von | nach |
+|---|---|---|---|
+| — | | LM393 **Pin 8** (VCC) | ESP32 **3V3** |
+| — | | LM393 **Pin 4** (GND) | ESP32 **GND** |
+| C6 | 100 nF | Pin 8 | Pin 4 | so nah wie möglich am IC |
+
+**LM393-Pinout (DIP-8, Kerbe oben links = Pin 1):**
+
+```
+        ┌──∪──┐
+OUT A 1 │     │ 8 VCC (3V3)
+IN− A 2 │     │ 7 OUT B
+IN+ A 3 │     │ 6 IN− B
+  GND 4 │     │ 5 IN+ B
+        └─────┘
+```
+
+**BC547B (TO-92):** flache Seite zu dir, Beine nach unten, von links nach rechts **C – B – E**.
+Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest prüfen.
+
+---
+
+## 3. Stückliste (bedrahtet)
+
+| Anz. | Bauteil | Wert / Typ | wofür |
+|---|---|---|---|
+| 1 | IC | **LM393N** (DIP-8) + IC-Sockel | Komparatoren A und B |
+| 5 | Schottky-Diode | **BAT46** (DO-35) | D1–D5 |
+| 1 | Diode | **1N4148** | D6 |
+| 1 | Transistor | **BC547B** (oder BC547C / BC548B) | Q1 (Stufe 2) |
+| 2 | Widerstand | 10 kΩ | R1, R4 |
+| 1 | Widerstand | 360 Ω | R2 |
+| 1 | Widerstand | 47 kΩ | R3 |
+| 1 | Widerstand | 100 kΩ | R5 |
+| 3 | Widerstand | 4,7 kΩ | R6, R7, R8 |
+| 1 | Widerstand | **220 Ω, 1 W** (alternativ 4× 910 Ω 0,25 W parallel) | R9 (Stufe 2) |
+| 1 | Kondensator | 68 pF Keramik | C1 |
+| 1 | Kondensator | 10 µF Keramik X7R (oder Elko ≥ 16 V) | C2 |
+| 1 | Kondensator | 1 nF Keramik | C3 |
+| 1 | Kondensator | 10 nF Keramik | C4 (Stufe 2) |
+| 1 | Kondensator | 1,5 nF Keramik | C5 (Stufe 2) |
+| 1 | Kondensator | 100 nF Keramik | C6 |
+| 2 | Induktivität | 4,7 µH axial (optional) | L1, L2 |
+| 2 | Polyfuse | ~300 mA (optional) | F1, F2 |
+| 1 | Schraubklemme | 2-polig, RM 5,08 | Busanschluss |
+| 2 | Buchsenleiste | 1×15 (oder passend zum DevKit) | ESP32 steckbar |
+| 1 | Lochrasterplatine | ca. 7×9 cm | |
+| – | Kabel | 2-adrig, z. B. J-Y(St)Y 2×2×0,6 | Gateway ↔ RC310-Sockel |
+
+Die Kosten liegen bei ca. 5–8 € plus Versand, z. B. bei Reichelt oder in einem Sortimentskasten.
+
+---
+
+## 4. Aufbau in zwei Stufen
+
+### Stufe 1: nur RX (Mitlesen)
+
+Bestücken: Eingang (F1/F2, L1/L2, C1, D1–D5), RX-Stufe (R1–R7, D6, C2, C3), LM393 + C6.
+
+Den **unbenutzten Komparator B festlegen**, damit er nicht schwingt:
+- Pin 5 (IN+ B) → GND
+- Pin 6 (IN− B) → 3V3
+- Pin 7 offen lassen
+
+Für Stufe 2 werden diese beiden Brücken wieder entfernt.
+
+### Stufe 2: TX dazu (Schreiben)
+
+Brücken an Pin 5/6 entfernen und Pin 5 → `U_REF`, Pin 6 → TX_IN (GPIO5) verdrahten.
+C4, R8, Q1, R9, C5 bestücken.
+
+---
+
+## 5. Prüfen vor dem ersten Anschluss
+
+**Ohne Bus**, nur mit dem ESP32 per USB versorgt:
+1. Pin 8 gegen Pin 4 ≈ **3,3 V**.
+2. RX_OUT (GPIO23) ≈ **3,3 V** und **niemals mehr**.
+3. Kein Kurzschluss zwischen den Busklemmen. Mit dem Ohmmeter messen; der Wert sollte im kΩ-Bereich liegen.
+
+**Mit Bus** (am RC310-Sockel parallel angeklemmt, siehe `anschluss.md`):
+1. `VBUS` gegen GND ≈ **12–17 V DC**.
+2. `U_REF` gegen GND ≈ **0,5–0,7 V**.
+3. Pin 3 ≈ `U_REF`, Pin 2 ≈ 0,9 × `U_REF`.
+4. RX_OUT liegt meist auf ~3,3 V. Bei Busverkehr wackelt der Wert leicht, weil Datenbits ankommen.
+5. Der RC310 muss normal weiterlaufen und darf keine Busstörung melden.
+
+---
+
+## 6. EMS-ESP einstellen
+
+- Board Profile: **NODEMCU** (RX GPIO23, TX GPIO5)
+- **Read only: an** (Stufe 1)
+- EMS Tx Mode: **EMS+** (RC310 = EMS2.0) oder **Auto**
+- Im Dashboard prüfen: Es werden Telegramme empfangen, und RC310 und Station tauchen unter „Devices“ auf.
+- Stufe 2: Read only aus und in Console oder Dashboard auf **Tx-Fehler** achten.
+
+---
+
+## 7. Sicherheitshinweise
+
+- Der Bus führt Kleinspannung (ca. 12–17 V). Trotzdem nicht unter Spannung umlöten.
+- Die GND des ESP32 ist mit der Bus-Minusseite verbunden; galvanisch getrennt ist hier nichts. Das ist unkritisch,
+  solange das USB-Netzteil ein normales, isoliertes Steckernetzteil ist.
+- Bricht die Kommunikation des RC310 zusammen: Gateway abklemmen, und alles läuft wie vorher.
