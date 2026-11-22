@@ -307,8 +307,25 @@ def hpwl(place):
         for x, y, net, _ in p["pins"]:
             if not net.startswith("NC:"):
                 pts[net].append((x, y))
-    return sum((max(x for x, _ in v) - min(x for x, _ in v)) + (max(y for _, y in v) - min(y for _, y in v))
+    span = sum((max(x for x, _ in v) - min(x for x, _ in v)) + (max(y for _, y in v) - min(y for _, y in v))
                for v in pts.values())
+    # Abstandsstrafe: Pins verschiedener Netze direkt nebeneinander blockieren Leitungswege
+    hole = {}
+    for p in b[0]:
+        for x, y, net, _ in p["pins"]:
+            hole[(x, y)] = net
+    crowd = 0
+    for (x, y), n in hole.items():
+        free = 0
+        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            m = hole.get(q)
+            if m is not None and m != n:
+                crowd += 1
+            if m is None and q not in b[1] and 0 <= q[0] < W and 0 <= q[1] < H:
+                free += 1
+        if free == 0 and not n.startswith("NC:"):
+            crowd += 10          # Pin ohne freies Nachbarloch: nicht anschließbar
+    return span + 2 * crowd
 
 
 def moves(rnd, cur):
