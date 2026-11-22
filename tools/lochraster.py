@@ -211,26 +211,31 @@ def route(net, src_set, dst, occ, pinmap, bodies, jump_ends):
             o = occ.get((nx, ny))
             turn = 3 if dirn and dirn != (dx, dy) else 0
             if o is None or o == net:
-                nd, k, jmp = d + 1 + turn, ((nx, ny), (dx, dy)), False
+                cands = [(d + 1 + turn, ((nx, ny), (dx, dy)), False)]
             else:
-                # isolierte Drahtbrücke oben über eine fremde Leitung (nicht über Pins/Bauteile)
-                if (nx, ny) in pinmap or (nx, ny) in bodies or o == "KEEP":
-                    continue
-                jx, jy = nx + dx, ny + dy
-                if not (0 <= jx < W and 0 <= jy < H):
-                    continue
-                o2 = occ.get((jx, jy))
-                if o2 is not None and o2 != net:
-                    continue
-                if xy in jump_ends or (jx, jy) in jump_ends:
-                    continue
-                if xy in pinmap or (jx, jy) in pinmap or xy in bodies or (jx, jy) in bodies:
-                    continue
-                nd, k, jmp = d + JUMP_COST + turn, ((jx, jy), (dx, dy)), True
-            if nd < dist.get(k, 1e9):
-                dist[k] = nd
-                prev[k] = ((xy, dirn), jmp)
-                heapq.heappush(pq, (nd, k[0], k[1]))
+                cands = []
+            # isolierte Drahtbrücke auf der Bauteilseite: gerade, über 1–5 Löcher hinweg
+            if xy not in pinmap and xy not in bodies and xy not in KEEP_BODY and xy not in jump_ends:
+                for L in range(2, 7):
+                    jx, jy = xy[0] + dx * L, xy[1] + dy * L
+                    if not (0 <= jx < W and 0 <= jy < H):
+                        break
+                    mid = [(xy[0] + dx * t, xy[1] + dy * t) for t in range(1, L)]
+                    if any(m in KEEP_BODY for m in mid):
+                        break
+                    if all(occ.get(m) in (None, net) for m in mid):
+                        continue          # direkter Weg ist frei, keine Brücke nötig
+                    o2 = occ.get((jx, jy))
+                    if o2 is not None and o2 != net:
+                        continue
+                    if (jx, jy) in pinmap or (jx, jy) in bodies or (jx, jy) in KEEP_BODY or (jx, jy) in jump_ends:
+                        continue
+                    cands.append((d + JUMP_COST + L + turn, ((jx, jy), (dx, dy)), True))
+            for nd, k, jmp in cands:
+                if nd < dist.get(k, 1e9):
+                    dist[k] = nd
+                    prev[k] = ((xy, dirn), jmp)
+                    heapq.heappush(pq, (nd, k[0], k[1]))
     return None
 
 
