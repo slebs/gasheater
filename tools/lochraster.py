@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lochraster-Layout für das EMS-Interface (ESP32 DevKit V1 auf der Platine, 3,3 V).
+"""Lochraster-Layout für das EMS-Interface (ESP32-C3 Super Mini auf Lochraster 5 × 7 cm, 3,3 V).
 
 - Bauteile werden auf einem 2,54-mm-Raster platziert (Platzierung in tools/placement.json,
   per --optimize automatisch verbessert: Simulated Annealing auf minimale Drahtlänge).
@@ -9,9 +9,8 @@
   jedes Netz zusammenhängend, keine Verbindung zwischen fremden Netzen.
 
 Aufruf:
-  python3 tools/lochraster.py docs 10            # Plan für 25,40 mm Reihenabstand
-  python3 tools/lochraster.py docs 9             # Plan für 22,86 mm Reihenabstand
-  python3 tools/lochraster.py docs 10 --optimize # Platzierung neu optimieren (dauert einige Minuten)
+  python3 tools/lochraster.py docs              # Plan aus tools/placement.json erzeugen
+  python3 tools/lochraster.py docs --optimize   # Platzierung neu optimieren (dauert einige Minuten)
 """
 import heapq
 import json
@@ -26,23 +25,24 @@ PLACEMENT_FILE = os.path.join(HERE, "placement.json")
 
 args = [a for a in sys.argv[1:] if not a.startswith("--")]
 OUT = args[0] if args else "docs"
-GAP = int(args[1]) if len(args) > 1 else 10   # Reihenabstand ESP32 in Löchern (10 = 25,4 mm, 9 = 22,86 mm)
 OPTIMIZE = "--optimize" in sys.argv
 ITERS = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--iters=")), 700)
 
 P = 20   # px pro Raster im SVG
 M = 40   # Rand im SVG
 
-# ------------------------------------------------------------------ Board / ESP32
-EX0 = 1
+# ------------------------------------------------------------------ Board / ESP32-C3 Super Mini
+W, H = 18, 24           # Lochrasterplatine 5 × 7 cm = 18 × 24 Löcher
+OFF = 0                 # Platzierung absolut
+EX0, GAP = 0, 6         # Super Mini: Stiftreihen 6 Raster = 15,24 mm auseinander
 EX1 = EX0 + GAP
-OFF = EX1 + 2           # erste Spalte für die Schaltung (Platzierung relativ dazu)
-CW, H = 32, 24          # Breite des Schaltungsbereichs, Höhe in Löchern
-W = OFF + CW
-EY0 = 3
-ESP_L = ["EN", "VP", "VN", "D34", "D35", "D32", "D33", "D25", "D26", "D27", "D14", "D12", "D13", "GND", "VIN"]
-ESP_R = ["D23", "D22", "TX0", "RX0", "D21", "D19", "D18", "D5", "TX2", "RX2", "D4", "D2", "D15", "GND", "3V3"]
-ESP_USE = {"D23": "RXO", "D5": "P6", "GND": "GND", "3V3": "VCC"}
+EY0 = 1                 # erste Stiftreihe; USB-C ragt über den oberen Rand hinaus
+# Pinbelegung, Draufsicht, USB-C oben (Beschriftung auf dem Board: links 5…21, rechts 5V/G/3V/4…0)
+ESP_L = ["IO5", "IO6", "IO7", "IO8", "IO9", "IO10", "IO20", "IO21"]
+ESP_R = ["5V", "GND", "3V3", "IO4", "IO3", "IO2", "IO1", "IO0"]
+ESP_USE = {"IO4": "RXO", "IO5": "P6", "GND": "GND", "3V3": "VCC"}   # EMS-ESP Profil C3MINI: RX 4, TX 5
+# Sperrfläche für Bauteile (das Modul steckt auf Buchsenleisten darüber). Leitungen darunter sind erlaubt.
+KEEP_BODY = {(x, y) for x in range(EX0, EX1 + 1) for y in range(0, EY0 + 8)}
 
 # ------------------------------------------------------------------ Bauteil-Vorlagen
 # Pins relativ zu Pin 1, Rotation r = 0..3 (90°-Schritte, echte Drehung, nie gespiegelt)
@@ -56,7 +56,10 @@ TEMPL = {
     "dip8": [(0, 0), (0, 1), (0, 2), (0, 3), (3, 3), (3, 2), (3, 1), (3, 0)],   # Pin 1..8
     "to92": [(0, 0), (1, 0), (2, 0)],   # C, B, E; flache Seite Richtung +y (r=0)
 }
-ALLOWED_R = {"dip8": (0, 2), "to92": (0, 2), "terminal": (0,)}
+ALLOWED_R = {"dip8": (0, 2), "to92": (0, 2), "terminal": (0,),
+             # r = 4..7: stehend eingebaut (Raster 2,54 mm), nur Widerstände (¼ W) und Dioden
+             "res": tuple(range(8)), "diode": tuple(range(8))}
+UPRIGHT = {"res": [(0, 0), (1, 0)], "diode": [(0, 0), (1, 0)]}
 
 # ref: (kind, value, [(net, pinlabel), ...])
 PARTS = {
@@ -98,9 +101,9 @@ EXPECTED = {
     "P3": {"C2.2", "R3.2", "U1.3"},
     "P2": {"C3.2", "R4.2", "R5.1", "U1.2"},
     "P1": {"U1.1", "R6.2", "R7.1"},
-    "RXO": {"R7.2", "ESP.D23"},
+    "RXO": {"R7.2", "ESP.IO4"},
     "VCC": {"U1.8", "C6.1", "R6.1", "R8.1", "ESP.3V3"},
-    "P6": {"U1.6", "C4.1", "ESP.D5"},
+    "P6": {"U1.6", "C4.1", "ESP.IO5"},
     "P7": {"U1.7", "R8.2", "Q1.B"},
     "TXC": {"Q1.C", "R9.2", "C5.1"},
     "JPX": {"JP1.2", "R9.1"},
@@ -119,9 +122,9 @@ def pin_id(ref, i, lbl):
 def esp_pins():
     pins = []
     for i, lbl in enumerate(ESP_L):
-        pins.append((EX0, EY0 + i, f"NC:L{lbl}", "L" + lbl))
+        pins.append((EX0, EY0 + i, ESP_USE.get(lbl, f"NC:{lbl}"), lbl))
     for i, lbl in enumerate(ESP_R):
-        pins.append((EX1, EY0 + i, ESP_USE.get(lbl, f"NC:R{lbl}"), lbl))
+        pins.append((EX1, EY0 + i, ESP_USE.get(lbl, f"NC:{lbl}"), lbl))
     return pins
 
 
@@ -134,10 +137,13 @@ def build(place):
         x0, y0, r = place[ref]
         x0 += OFF
         abs_pins = []
-        for (dx, dy), (net, lbl) in zip(TEMPL[kind], pins):
+        tpl = TEMPL[kind]
+        if r >= 4:
+            tpl, r = UPRIGHT[kind], r - 4
+        for (dx, dy), (net, lbl) in zip(tpl, pins):
             ox, oy = rot(dx, dy, r)
             x, y = x0 + ox, y0 + oy
-            if not (OFF - 1 <= x < W - 1 and 1 <= y < H - 1):
+            if not (0 <= x < W and 0 <= y < H) or (x, y) in KEEP_BODY:
                 return None
             abs_pins.append((x, y, net, lbl))
         cells = set()
@@ -161,11 +167,11 @@ def build(place):
                 return None
             used[(x, y)] = ref
         for c in cells:
-            if c in used or c in body:
+            if c in used or c in body or c in KEEP_BODY:
                 return None
         for c in cells:
             body[c] = ref
-        parts.append(dict(kind=kind, ref=ref, value=value, pins=abs_pins))
+        parts.append(dict(kind=kind, ref=ref, value=value, pins=abs_pins, upright=place[ref][2] >= 4))
     parts.append(dict(kind="esp", ref="ESP", value="ESP32 DevKit V1", pins=esp_pins()))
     return parts, set(body)
 
@@ -228,13 +234,11 @@ def route(net, src_set, dst, occ, pinmap, bodies, jump_ends):
     return None
 
 
-def try_order(order, pinmap, bodies):
+def try_order(order, pinmap, bodies, allow_fail=False):
     jump_ends = set()
     occ = {xy: n for xy, (n, _) in pinmap.items()}
-    for kx in range(0, EX1):          # keine Leitungen unter dem ESP32
-        for ky in range(H):
-            occ.setdefault((kx, ky), "KEEP")
     wires, jumps, cost = defaultdict(list), [], 0
+    fails = 0
     for net in order:
         pins = [xy for xy, (n, _) in pinmap.items() if n == net]
         tree, todo = {pins[0]}, pins[1:]
@@ -243,7 +247,11 @@ def try_order(order, pinmap, bodies):
             q = todo.pop(0)
             r = route(net, tree, q, occ, pinmap, bodies, jump_ends)
             if not r:
-                return ("FAIL", net)
+                if not allow_fail:
+                    return ("FAIL", net)
+                fails += 1
+                cost += 200
+                continue
             holes, jf = r
             seg = [holes[0]]
             for i, j in enumerate(jf):
@@ -260,6 +268,8 @@ def try_order(order, pinmap, bodies):
             for h in holes:
                 occ[h] = net
                 tree.add(h)
+    if allow_fail:
+        return cost, fails
     return cost, wires, jumps
 
 
@@ -283,19 +293,73 @@ def route_all(pinmap, bodies, n_orders, seed=1):
 
 
 # ------------------------------------------------------------------ Platzierung
+def hpwl(place):
+    b = build(place)
+    if not b:
+        return None
+    pts = defaultdict(list)
+    for p in b[0]:
+        for x, y, net, _ in p["pins"]:
+            if not net.startswith("NC:"):
+                pts[net].append((x, y))
+    return sum((max(x for x, _ in v) - min(x for x, _ in v)) + (max(y for _, y in v) - min(y for _, y in v))
+               for v in pts.values())
+
+
+def moves(rnd, cur):
+    cand = dict(cur)
+    refs = list(PARTS)
+    ref = rnd.choice(refs)
+    x, y, r = cand[ref]
+    kind = PARTS[ref][0]
+    m = rnd.random()
+    if m < 0.6:
+        cand[ref] = (x + rnd.randint(-2, 2), y + rnd.randint(-2, 2), r)
+    elif m < 0.85:
+        cand[ref] = (x, y, rnd.choice(ALLOWED_R.get(kind, (0, 1, 2, 3))))
+    else:
+        same = [q for q in refs if PARTS[q][0] == kind and q != ref]
+        if same:
+            q = rnd.choice(same)
+            cand[ref], cand[q] = cand[q], cand[ref]
+    return cand
+
+
 def initial_placement():
     if os.path.exists(PLACEMENT_FILE):
         return {k: tuple(v) for k, v in json.load(open(PLACEMENT_FILE)).items()}
-    # Startplatzierung: kompakt, grob von Hand (x relativ zu OFF)
-    return {
-        "U1": (3, 9, 0), "C6": (4, 7, 0), "R6": (5, 5, 0), "R7": (0, 3, 1),
-        "C4": (7, 11, 0), "R8": (9, 12, 1), "Q1": (5, 16, 0), "C5": (9, 18, 0),
-        "R9": (12, 19, 0), "JP1": (18, 19, 0),
-        "R3": (8, 8, 0), "R4": (8, 10, 0), "R5": (2, 14, 0), "C2": (13, 6, 0), "C3": (13, 9, 0),
-        "R1": (17, 2, 1), "R2": (17, 7, 1), "D6": (15, 12, 1),
-        "D1": (20, 7, 3), "D3": (23, 7, 3), "D2": (20, 12, 3), "D4": (23, 12, 3),
-        "C1": (25, 8, 1), "J1": (27, 8, 0),
-    }
+    # Greedy: Bauteile nacheinander an die gültige Stelle mit kleinster Netz-Spannweite setzen
+    rnd = random.Random(3)
+    place = {}
+    order = ["U1", "C6", "R6", "R7", "C4", "R8", "Q1", "C5", "R9", "JP1", "R3", "R4", "R5", "C2", "C3",
+             "R2", "D6", "R1", "D1", "D2", "D3", "D4", "C1", "J1"]
+    global PARTS
+    full = PARTS
+    for ref in order:
+        best = None
+        for x in range(W):
+            for y in range(H):
+                for r in ALLOWED_R.get(full[ref][0], (0, 1, 2, 3)):
+                    PARTS = {k: full[k] for k in list(place) + [ref]}
+                    cand = dict(place)
+                    cand[ref] = (x, y, r)
+                    c = hpwl(cand)
+                    if c is not None and (best is None or c < best[0]):
+                        best = (c, (x, y, r))
+        PARTS = full
+        if best is None:
+            sys.exit(f"Kein Platz für {ref}")
+        place[ref] = best[1]
+    # Simulated Annealing auf Netz-Spannweite (schnell)
+    cur, cc = dict(place), hpwl(place)
+    for i in range(20000):
+        T = 6.0 * (1 - i / 20000) + 0.05
+        cand = moves(rnd, cur)
+        c = hpwl(cand)
+        if c is not None and (c < cc or rnd.random() < math.exp((cc - c) / T)):
+            cur, cc = cand, c
+    print(f"  Startplatzierung (HPWL {cc})", flush=True)
+    return cur
 
 
 def evaluate(place, n_orders):
@@ -310,43 +374,52 @@ def evaluate(place, n_orders):
     return r[0], parts, bodies, pinmap, r
 
 
+def graded(place, n_orders):
+    """Kosten auch für nicht vollständig verlegbare Platzierungen (200 je fehlender Verbindung)."""
+    b = build(place)
+    if not b:
+        return None
+    parts, bodies = b
+    pinmap = make_pinmap(parts)
+    rnd = random.Random(1)
+    best = None
+    base = ["GND", "VBUS", "VCC"]
+    for it in range(n_orders):
+        rest = [n for n in NETS if n not in base]
+        rnd.shuffle(rest)
+        order = (base + rest) if it % 2 == 0 else rnd.sample(NETS, len(NETS))
+        c, f = try_order(order, pinmap, bodies, allow_fail=True)
+        if best is None or c < best[0]:
+            best = (c, f)
+    return best
+
+
 def optimize(place, iters, n_orders=6):
     rnd = random.Random(7)
     cur = dict(place)
-    ev = evaluate(cur, n_orders)
-    if ev is None:
-        sys.exit("Startplatzierung ungültig oder nicht routbar")
-    cur_cost = ev[0]
-    print(f"  Start: Kosten {cur_cost}", flush=True)
-    best, best_cost = dict(cur), cur_cost
-    refs = list(PARTS)
-    T0 = 30.0
+    g = graded(cur, n_orders)
+    if g is None:
+        sys.exit("Startplatzierung ungültig")
+    cur_cost = g[0]
+    print(f"  Start: Kosten {cur_cost} (fehlend {g[1]})", flush=True)
+    best, best_cost = (dict(cur), cur_cost) if g[1] == 0 else (None, 1e9)
+    T0 = 40.0
     for i in range(iters):
         T = T0 * (1 - i / iters) + 0.5
-        cand = dict(cur)
-        ref = rnd.choice(refs)
-        x, y, r = cand[ref]
-        kind = PARTS[ref][0]
-        m = rnd.random()
-        if m < 0.6:
-            cand[ref] = (x + rnd.randint(-2, 2), y + rnd.randint(-2, 2), r)
-        elif m < 0.85:
-            cand[ref] = (x, y, rnd.choice(ALLOWED_R.get(kind, (0, 1, 2, 3))))
-        else:  # zwei gleichartige Bauteile tauschen
-            same = [q for q in refs if PARTS[q][0] == kind and q != ref]
-            if not same:
-                continue
-            q = rnd.choice(same)
-            cand[ref], cand[q] = cand[q], cand[ref]
-        ev = evaluate(cand, n_orders)
-        if ev is None:
+        cand = moves(rnd, cur)
+        g = graded(cand, n_orders)
+        if g is None:
             continue
-        c = ev[0]
+        c, f = g
         if c < cur_cost or rnd.random() < math.exp((cur_cost - c) / T):
             cur, cur_cost = cand, c
-            if c < best_cost:
+            if f == 0 and c < best_cost:
                 best, best_cost = dict(cand), c
                 print(f"  iter {i}: Kosten {c}", flush=True)
+        if i % 100 == 0:
+            print(f"  … iter {i}: aktuell {cur_cost}", flush=True)
+    if best is None:
+        sys.exit("Keine vollständig verdrahtbare Platzierung gefunden")
     return best
 
 
@@ -382,8 +455,6 @@ def verify(pinmap, wires, jumps):
             for xy in path:
                 if hole_net.setdefault(xy, net) != net:
                     sys.exit(f"KURZSCHLUSS bei {xy}: {hole_net[xy]} / {net}")
-                if xy[0] < EX1 and xy not in pinmap:
-                    sys.exit(f"Leitung unter dem ESP32 bei {xy}")
     for net, ja, jb in jumps:
         union(ja, jb)
         for xy in (ja, jb):
@@ -491,6 +562,21 @@ def svg(parts, pinmap, wires, jumps, mirror):
             cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
             horiz = abs(x2 - x1) > abs(y2 - y1)
             L = abs(x2 - x1) + abs(y2 - y1)
+            if p.get("upright"):
+                # stehend: Körper als Kreis über Pin 1, Draht zurück zu Pin 2
+                bxp, byp = pts[0]
+                col = {"res": "#e9d7b0", "diode": "#c2410c"}[k]
+                if p["value"] == "1N4148":
+                    col = "#f59e0b"
+                g.append(f'<circle cx="{bxp}" cy="{byp}" r="8" fill="{col}" stroke="#333" stroke-width="1"/>')
+                if k == "diode":
+                    kx2, ky2 = pts[1]
+                    g.append(f'<text x="{kx2}" y="{ky2 + 3}" font-size="8" text-anchor="middle" font-weight="bold" fill="#111">K</text>')
+                if not mirror:
+                    g.append(f'<text x="{bxp}" y="{byp - 11}" font-size="8.5" text-anchor="middle" fill="#111">{p["ref"]} {p["value"]}</text>')
+                g.append("</g>")
+                o += g
+                continue
             if k == "ccap":
                 bl, bt, rx = min(L - 6, 26), 13, 6
                 fill = "#e8b04a" if p["value"] == "10µ" else "#f0c75e"
@@ -563,20 +649,20 @@ def svg(parts, pinmap, wires, jumps, mirror):
         elif k == "esp":
             x0, x1_ = min(xs), max(xs)
             y0, y1_ = min(ys), max(ys)
-            g.append(f'<rect x="{x0 - 12}" y="{y0 - 3 * P + 10}" width="{x1_ - x0 + 24}" height="{y1_ - y0 + 4.5 * P}" rx="4" '
-                     f'fill="#1e3a8a" fill-opacity="{0.08 if mirror else 0.18}" stroke="#1e3a8a" stroke-width="1.5" stroke-dasharray="6 3"/>')
+            g.append(f'<rect x="{x0 - 12}" y="{y0 - 1.6 * P}" width="{x1_ - x0 + 24}" height="{y1_ - y0 + 2.4 * P}" rx="4" '
+                     f'fill="#111827" fill-opacity="{0.06 if mirror else 0.16}" stroke="#111827" stroke-width="1.5" stroke-dasharray="6 3"/>')
+            cx = (x0 + x1_) / 2
+            g.append(f'<rect x="{cx - 18}" y="{y0 - 1.6 * P - 8}" width="36" height="22" rx="4" fill="#9ca3af" opacity="0.8"/>')
             for (a, b), (_, _, net, lbl) in zip(pts, p["pins"]):
                 used = not net.startswith("NC:")
                 g.append(f'<rect x="{a - 4}" y="{b - 4}" width="8" height="8" fill="{"#d4af37" if used else "#555"}"/>')
                 if not mirror:
                     inner = 1 if a == x0 else -1
                     g.append(f'<text x="{a + inner * 9}" y="{b + 3}" font-size="8" text-anchor="{"start" if inner > 0 else "end"}" '
-                             f'fill="{"#111" if used else "#667"}" font-weight="{"bold" if used else "normal"}">{lbl[1:] if a == x0 else lbl}</text>')
+                             f'fill="{"#111" if used else "#667"}" font-weight="{"bold" if used else "normal"}">{lbl}</text>')
             if not mirror:
-                cx = (x0 + x1_) / 2
-                g.append(f'<text x="{cx}" y="{y0 - 2 * P + 8}" font-size="10" text-anchor="middle" font-weight="bold">ESP32 DevKit V1</text>')
-                g.append(f'<text x="{cx}" y="{y0 - 2 * P + 21}" font-size="9" text-anchor="middle">Antenne oben, Chip nach oben</text>')
-                g.append(f'<text x="{cx}" y="{y1_ + 1.4 * P}" font-size="9" text-anchor="middle">USB unten</text>')
+                g.append(f'<text x="{cx}" y="{y1_ + 1.3 * P}" font-size="9" text-anchor="middle" font-weight="bold">ESP32-C3 Super Mini</text>')
+                g.append(f'<text x="{cx}" y="{y0 - 1.6 * P + 7}" font-size="8" text-anchor="middle">USB-C</text>')
         g.append("</g>")
         o += g
     lx = bw + 10
@@ -593,10 +679,12 @@ def svg(parts, pinmap, wires, jumps, mirror):
     yy += 8
     notes = [
         f"Raster 2,54 mm, Platine ≥ {W} × {H} Löcher (ca. {W * 0.254:.1f} × {H * 0.254:.1f} cm).",
-        f"ESP32-Stiftreihen: {GAP} Raster = {GAP * 2.54:.2f} mm ({GAP - 1} freie Löcher dazwischen).",
-        "ESP32 auf 2 Buchsenleisten 1×15 stecken (nicht direkt einlöten).",
-        "Genutzte ESP32-Pins (gold): 3V3, GND, D23 (RX), D5 (TX).",
-        "Dioden: schwarzer Ring = Kathode.",
+        f"ESP32-C3-Stiftreihen: {GAP} Raster = {GAP * 2.54:.2f} mm ({GAP - 1} freie Löcher dazwischen).",
+        "ESP32-C3 auf 2 Buchsenleisten 1×8 stecken, USB-C zeigt über den Rand.",
+        "Genutzte Pins (gold): 3V3, GND, IO4 (RX), IO5 (TX).",
+        "Unter dem Modul dürfen Leitungen (Lötseite) liegen, keine Bauteile.",
+        "Dioden: schwarzer Ring = Kathode (bei stehenden: Pin „K“).",
+        "Kreis = stehend eingebaut: Körper sitzt auf diesem Loch, Draht zum Nachbarloch.",
         "U1: Kerbe/Punkt = Pin 1 wie gezeichnet. Sockel verwenden!",
         "Q1 BC547B: flache Seite wie gezeichnet, Pins C/B/E beschriftet.",
         "JP1 gezogen = TX aus (nur Mitlesen).",
@@ -633,7 +721,7 @@ if __name__ == "__main__":
           f"{len(jumps)} Drahtbrücken oben, keine Kurzschlüsse")
     for net, ja, jb in jumps:
         print("  Brücke", net, ja, "->", jb)
-    tag = f"esp_{GAP * 254 // 100}-{GAP * 254 % 100:02d}mm"
+    tag = "c3"
     with open(f"{OUT}/lochraster_{tag}_bestueckung.svg", "w") as f:
         f.write(svg(parts, pinmap, wires, jumps, False))
     with open(f"{OUT}/lochraster_{tag}_loetseite.svg", "w") as f:

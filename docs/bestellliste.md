@@ -24,6 +24,6 @@ im Artikel kontrollieren.
 | 1 | Keramik-Kondensator 10 µF X7R | `10µF X7R 25V RM5` | oder Elko 10 µF/25 V |
 | 1 | Schraubklemme 2-polig RM 5,08 | `AKL 101-02` | |
 | 1 | Stiftleiste 1×2 + Jumper | `Stiftleiste 2,54` / `Jumper 2,54` | JP1 |
-| 2 | Buchsenleiste 1×15, RM 2,54 | `Buchsenleiste 15pol` | Sockel für ESP32 DevKit |
-| 1 | Lochrasterplatine 160 × 100 mm | `Lochraster 160x100` | Lötpunkte, kein Streifenraster |
+| 2 | Buchsenleiste 1×8, RM 2,54 | `Buchsenleiste 8pol` | Sockel für ESP32-C3 Super Mini |
+| – | Lochrasterplatine 5 × 7 cm | – | schon vorhanden |
 | – | Schaltdraht verzinnt 0,6 mm + isolierter Draht | `Schaltdraht` | Lötseite + Brücken |

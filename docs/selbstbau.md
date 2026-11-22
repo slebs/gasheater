@@ -1,36 +1,37 @@
-# Selbstbau: EMS-Interface + ESP32 DevKit V1
+# Selbstbau: EMS-Interface + ESP32-C3 Super Mini
 
 > Status: Schaltplan, Stückliste und Aufbau siehe **`schaltplan.md`**.
 
 ## Hardware
 
-- **MCU:** ESP32 DevKit V1 (ESP-WROOM-32), klassischer ESP32 und damit von EMS-ESP unterstützt.
-- **Versorgung:** über die USB-Buchse des DevKits (5-V-Netzteil). Nicht aus dem Bus versorgen, weil das
+- **MCU:** ESP32-C3 Super Mini (USB-C). EMS-ESP hat dafür einen offiziellen Build (`c3_mini_4M`) und das
+  Board-Profil `C3MINI`. Er passt zusammen mit der Schaltung auf die vorhandene Lochrasterplatine 5 × 7 cm.
+  Der ebenfalls vorhandene „D1 Mini ESP32“ wäre mit ca. 31 × 39 mm zu groß dafür.
+- **Versorgung:** über die USB-C-Buchse (5-V-Netzteil). Nicht aus dem Bus versorgen, weil das
   bei Nachbauten mehrfach nicht stabil lief.
+- **Hinweis zum Super Mini:** Viele Exemplare haben eine schwache Antenne. Wenn das WLAN instabil ist, in
+  EMS-ESP die WLAN-Sendeleistung reduzieren (Network Settings) oder das Gateway näher an den Router bringen.
 
-## Pinbelegung: EMS-ESP Board-Profil „NODEMCU“
+## Pinbelegung: EMS-ESP Board-Profil „C3MINI“
 
-Das Profil **NODEMCU** (NodeMCU 32S) passt direkt zum DevKit V1. Es braucht keinen Developer-Mode
-und kein Custom-Profil.
-
-| Funktion | GPIO | Beschriftung DevKit |
+| Funktion | GPIO | Beschriftung Super Mini |
 |---|---|---|
-| EMS RX (vom Interface `RX_OUT`) | **GPIO23** | `D23` |
-| EMS TX (zum Interface `TX_IN`) | **GPIO5** | `D5` |
-| LED | GPIO2 | onboard (blau) |
-| 3V3 für den Komparator | 3V3 | `3V3` |
-| GND | GND | `GND` |
+| EMS RX (vom Interface `RX_OUT`) | **GPIO4** | `4` (rechte Reihe) |
+| EMS TX (zum Interface `TX_IN`) | **GPIO5** | `5` (linke Reihe, oben) |
+| 3V3 für den Komparator | 3V3 | `3V` |
+| GND | GND | `G` |
 
-Nicht `RX0`/`TX0` verwenden, die hängen am USB-Chip.
+Strapping-Pins (GPIO2, 8, 9) nicht verwenden.
 
 Einstellungen in EMS-ESP:
-- Settings → Application → Board Profile: **NODEMCU**
+- Firmware: Variante **`c3_mini_4M`**
+- Settings → Application → Board Profile: **C3MINI** (RX GPIO4, TX GPIO5)
 - EMS Tx Mode: **EMS+** (der RC310 ist ein EMS2.0/EMS+-Gerät), alternativ **Auto**
 - EMS Bus ID: Standard **Gateway 2 (0x49)** lassen
 - Erstinbetriebnahme mit **Read only**
 
-Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile. Firmware-Standard ist RX 23 / TX 5
-(`src/core/default_settings.h`).
+Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile (C3MINI: RX 4, TX 5), Build-Ziele in
+`platformio.ini` des EMS-ESP32-Repos.
 
 ## Bekannte Eckdaten des Referenzdesigns (bbqkees EMS-Wiki)
 
@@ -51,7 +52,7 @@ Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile. Firmware-Stan
 
 1. Komplette Platine (RX + TX, JP1 gezogen) aufbauen und mit dem Multimeter prüfen: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und
    nie über 3,3 V.
-2. EMS-ESP flashen (Web-Installer, Profil `s_4M`), Board-Profil **NODEMCU** wählen, **Read only** aktivieren.
+2. EMS-ESP flashen (Variante `c3_mini_4M`), Board-Profil **C3MINI** wählen, **Read only** aktivieren.
 3. An den RC310-Sockel parallel anklemmen (siehe `anschluss.md`) und die Geräteliste prüfen.
 4. Erst danach JP1 stecken und Read only abschalten.
 
