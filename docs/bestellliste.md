@@ -7,7 +7,7 @@ im Artikel kontrollieren.
 |---|---|---|---|
 | 1 | LM393, DIP-8 | `LM 393 DIP` | |
 | 1 | IC-Sockel 8-polig | `GS 8` | |
-| 5 | Schottky-Diode BAT46 | `BAT 46` | DO-35 |
+| 4 | Schottky-Diode BAT46 | `BAT 46` | DO-35 |
 | 1 | Diode 1N4148 | `1N 4148` | |
 | 1 | Transistor BC547B | `BC 547B` | TO-92 |
 | 2 | Widerstand 10 kΩ ¼ W | `METALL 10,0K` | |
@@ -22,7 +22,6 @@ im Artikel kontrollieren.
 | 1 | Keramik-Kondensator 10 nF | `KERKO 10N` | |
 | 1 | Keramik-Kondensator 100 nF | `KERKO 100N` | |
 | 1 | Keramik-Kondensator 10 µF X7R | `10µF X7R 25V RM5` | oder Elko 10 µF/25 V |
-| 2 | Festinduktivität 4,7 µH axial | `4,7µH axial` | optional, sonst Drahtbrücke |
 | 1 | Schraubklemme 2-polig RM 5,08 | `AKL 101-02` | |
 | 1 | Stiftleiste 1×2 + Jumper | `Stiftleiste 2,54` / `Jumper 2,54` | JP1 |
 | 2 | Buchsenleiste 1×15, RM 2,54 | `Buchsenleiste 15pol` | Sockel für ESP32 DevKit |

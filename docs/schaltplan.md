@@ -6,7 +6,8 @@ Hier wurde es angepasst für:
 
 - **ESP32 DevKit V1**: Die Versorgung ist **3,3 V statt 5 V**. Dann liefert RX_OUT nie mehr als 3,3 V.
 - **Bedrahtete Bauteile** für Lochraster, z. B. BC547B statt BC847B (SMD) und BAT46 statt BAT54S.
-- **Induktivitäten 4,7 µH.** Der Originalplan sagt 4,7 mH; laut bbqkees ist das ein Übertragungsfehler.
+- **Vereinfacht:** Die Entstördrosseln L1/L2 (im Original „4,7 mH“, laut bbqkees eigentlich 4,7 µH), die
+  Polyfuses F1/F2 und die Schutzdiode D5 entfallen. Begründung siehe Abschnitt 1a.
 
 ---
 
@@ -20,27 +21,34 @@ Hier wurde es angepasst für:
 - **TX:** Der ESP32 sendet auf TX_IN. Komparator B schaltet den Transistor, und der zieht über ca. 220 Ω Strom
   aus dem Bus (Strommodulation; so senden EMS-Slaves). In Ruhe (TX = High) ist der Transistor aus.
 
+### 1a. Was gegenüber dem Original weggelassen wurde
+
+| Bauteil | Original | Warum es entfallen kann |
+|---|---|---|
+| F1/F2 | Polyfuses, im Plan „N/A“ (nicht bestückt) | waren schon im Original nicht bestückt |
+| L1/L2 | Entstördrosseln in den Busleitungen | nur EMV-Filterung. Viele Nachbauten laufen ohne; sie lassen sich später nachrüsten, wenn Störungen auftreten |
+| D5 | BAT46 von GND nach VBUS | Hinter dem Brückengleichrichter kann VBUS nicht unter GND fallen. Ohne die Drosseln gibt es auch keine induktiven Spitzen mehr, die D5 abfangen müsste |
+
+Die Funktion von RX und TX bleibt unverändert. Das ist eine Abwägung, kein Test: Sollten im Betrieb
+Busfehler auftreten, wären die Drosseln das Erste, was man nachrüstet.
+
 ---
 
 ## 2. Netzliste
 
-Netznamen: `L1`/`L2` = Busklemmen, `VBUS` = Plus nach dem Gleichrichter, `NA` = Knoten nach dem 10-k-Widerstand,
+Netznamen: `L1`/`L2` = Busleitungen (direkt an J1), `VBUS` = Plus nach dem Gleichrichter, `NA` = Knoten nach dem 10-k-Widerstand,
 `U_REF` = Referenz, `VCC` = **3V3 vom ESP32**, `GND` = Minus nach dem Gleichrichter = GND des ESP32.
 
 ### Eingang und Gleichrichter
 
 | Bauteil | Wert | von | nach | Hinweis |
 |---|---|---|---|---|
-| F1 | Brücke oder Polyfuse ~300 mA | Klemme 1 | L1a | Im Original „N/A“; eine Drahtbrücke reicht |
-| F2 | Brücke oder Polyfuse ~300 mA | Klemme 2 | L2a | |
-| L1 | 4,7 µH | L1a | `L1` | darf für den ersten Test auch eine Drahtbrücke sein |
-| L2 | 4,7 µH | L2a | `L2` | |
+| J1 | Schraubklemme 2-pol. | Klemme 1 = `L1`, Klemme 2 = `L2` | | F1/F2/L1/L2 entfallen (Abschnitt 1a) |
 | C1 | 68 pF | `L1` | `L2` | Keramik |
 | D1 | BAT46 | Anode `L1` | Kathode `VBUS` | |
 | D2 | BAT46 | Anode `GND` | Kathode `L1` | |
 | D3 | BAT46 | Anode `L2` | Kathode `VBUS` | |
 | D4 | BAT46 | Anode `GND` | Kathode `L2` | |
-| D5 | BAT46 | Anode `GND` | Kathode `VBUS` | Schutzdiode, so eingezeichnet |
 
 ### RX-Stufe (Komparator A = LM393 Pins 1/2/3)
 
@@ -98,7 +106,7 @@ Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest 
 | Anz. | Bauteil | Wert / Typ | wofür |
 |---|---|---|---|
 | 1 | IC | **LM393N** (DIP-8) + IC-Sockel | Komparatoren A und B |
-| 5 | Schottky-Diode | **BAT46** (DO-35) | D1–D5 |
+| 4 | Schottky-Diode | **BAT46** (DO-35) | D1–D4 |
 | 1 | Diode | **1N4148** | D6 |
 | 1 | Transistor | **BC547B** (oder BC547C / BC548B) | Q1 |
 | 2 | Widerstand | 10 kΩ | R1, R4 |
@@ -113,8 +121,6 @@ Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest 
 | 1 | Kondensator | 10 nF Keramik | C4 |
 | 1 | Kondensator | 1,5 nF Keramik | C5 |
 | 1 | Kondensator | 100 nF Keramik | C6 |
-| 2 | Induktivität | 4,7 µH axial (optional) | L1, L2 |
-| 2 | Polyfuse | ~300 mA (optional) | F1, F2 |
 | 1 | Stiftleiste 2-pol. + Jumper | | JP1 (TX ein/aus) |
 | 1 | Schraubklemme | 2-polig, RM 5,08 | Busanschluss |
 | 2 | Buchsenleiste | 1×15 (oder passend zum DevKit) | ESP32 steckbar |
