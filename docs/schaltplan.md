@@ -183,6 +183,41 @@ Zusätzliches Bauteil: 1× Stiftleiste 2-polig + 1× Jumper (JP1).
 
 ---
 
-## 8. Lochraster-Plan
+## 8. Lochraster-Plan (ESP32-C3 Super Mini, Platine 5 × 7 cm)
 
-(wird nach der Layout-Optimierung ergänzt)
+- `lochraster_c3_bestueckung.svg`: Draufsicht auf die Bauteilseite
+- `lochraster_c3_loetseite.svg`: Lötseite, gespiegelt (so liegt die Platine beim Löten vor dir)
+
+**Platine:** die vorhandene Lochrasterplatine 5 × 7 cm (18 × 24 Löcher). Koordinaten (x, y) zählen von oben
+links auf der Bauteilseite, die Achsen sind beschriftet. Die USB-C-Buchse des Super Mini zeigt nach oben
+über den Rand.
+
+**Vor dem Löten prüfen:**
+1. Die Platine hat wirklich 18 × 24 Löcher (Löcher einer Längs- und einer Querreihe zählen).
+2. Die Stiftreihen des Super Mini liegen 6 Raster auseinander (15,24 mm, also 5 freie Löcher dazwischen).
+3. Die Pinbeschriftung auf deinem Super Mini stimmt mit dem Plan überein (links 5…21, rechts 5V, G, 3V, 4…0).
+
+Wenn eins davon nicht passt: Bescheid geben, dann wird der Plan angepasst.
+
+**Platzsparend:** Einige Widerstände und Dioden stehen (im Plan als Kreis). Der Körper sitzt auf dem Loch mit
+dem Kreis, der Draht wird zurückgebogen und kommt ins Nachbarloch. Bei der stehenden Diode ist das Loch mit „K“ die Kathode.
+
+**Drahtbrücken auf der Bauteilseite** (isolierter Draht, gerade, im Plan als Bogen gezeichnet):
+
+| Netz | von | nach |
+|---|---|---|
+| U_REF | (14, 9) | (14, 11) |
+| U_REF | (17, 5) | (17, 11) |
+| GND | (13, 4) | (13, 8) |
+| Knoten NA | (16, 6) | (16, 12) |
+
+Alle übrigen Verbindungen liegen auf der Lötseite als blanker Draht oder Lötbrücke entlang der Lochreihen.
+Unter dem Modul dürfen Leitungen auf der Lötseite liegen, aber keine Bauteile.
+
+Den Plan erzeugt `tools/lochraster.py` (`python3 tools/lochraster.py docs`). Die Platzierung steht in
+`tools/placement.json` und lässt sich mit `--optimize` neu berechnen. Das Skript verlegt die Leitungen
+und prüft sie automatisch gegen die Netzliste oben: alle Netze zusammenhängend, keine Verbindung
+zwischen fremden Netzen.
+
+**Vor dem ersten Einschalten** (ESP32-C3 noch nicht gesteckt) jedes Netz mit dem Durchgangsprüfer abklappern.
+Zwischen VBUS, GND und 3V3 darf kein Durchgang sein.

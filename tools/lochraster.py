@@ -221,8 +221,8 @@ def route(net, src_set, dst, occ, pinmap, bodies, jump_ends):
                     if not (0 <= jx < W and 0 <= jy < H):
                         break
                     mid = [(xy[0] + dx * t, xy[1] + dy * t) for t in range(1, L)]
-                    if any(m in KEEP_BODY for m in mid):
-                        break
+                    if any(m in KEEP_BODY or m in jump_ends for m in mid):
+                        break             # Brücken nicht über andere Brücken legen
                     if all(occ.get(m) in (None, net) for m in mid):
                         continue          # direkter Weg ist frei, keine Brücke nötig
                     o2 = occ.get((jx, jy))
@@ -263,7 +263,9 @@ def try_order(order, pinmap, bodies, allow_fail=False):
                 if j:
                     wires[net].append(seg)
                     jumps.append((net, holes[i], holes[i + 1]))
-                    jump_ends.update((holes[i], holes[i + 1]))
+                    (ax, ay), (bx, by) = holes[i], holes[i + 1]
+                    n_ = abs(bx - ax) + abs(by - ay)
+                    jump_ends.update((ax + (bx - ax) * t // n_, ay + (by - ay) * t // n_) for t in range(n_ + 1))
                     cost += JUMP_COST
                     seg = [holes[i + 1]]
                 else:
@@ -522,8 +524,8 @@ COL = {
 }
 NETNAME = {
     "GND": "GND", "VBUS": "VBUS (+12…17 V)", "VCC": "3V3", "UREF": "U_REF (≈0,6 V)", "NA": "Knoten NA",
-    "P1": "LM393 Pin 1 (OUT A)", "P2": "LM393 Pin 2", "P3": "LM393 Pin 3", "RXO": "RX_OUT → D23",
-    "P6": "TX_IN ← D5 (Pin 6)", "P7": "LM393 Pin 7 / Basis Q1", "TXC": "Kollektor Q1",
+    "P1": "LM393 Pin 1 (OUT A)", "P2": "LM393 Pin 2", "P3": "LM393 Pin 3", "RXO": "RX_OUT → IO4",
+    "P6": "TX_IN ← IO5 (Pin 6)", "P7": "LM393 Pin 7 / Basis Q1", "TXC": "Kollektor Q1",
     "NL1": "Bus-Leitung 1", "NL2": "Bus-Leitung 2", "JPX": "JP1 → R9",
 }
 ORDER = ["GND", "VBUS", "VCC", "UREF", "NA", "P2", "P3", "P1", "RXO", "P6", "P7", "TXC", "NL1", "NL2", "JPX"]
@@ -538,7 +540,7 @@ def svg(parts, pinmap, wires, jumps, mirror):
 
     bw, bh = 2 * M + (W - 1) * P, 2 * M + (H - 1) * P
     legend_w = 450
-    hh = max(bh, 600)
+    hh = max(bh, 760)
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{bw + legend_w}" height="{hh}" '
          f'viewBox="0 0 {bw + legend_w} {hh}" font-family="Helvetica,Arial,sans-serif">',
          '<rect width="100%" height="100%" fill="#ffffff"/>',
@@ -595,7 +597,7 @@ def svg(parts, pinmap, wires, jumps, mirror):
                     kx2, ky2 = pts[1]
                     g.append(f'<text x="{kx2}" y="{ky2 + 3}" font-size="8" text-anchor="middle" font-weight="bold" fill="#111">K</text>')
                 if not mirror:
-                    g.append(f'<text x="{bxp}" y="{byp - 11}" font-size="8.5" text-anchor="middle" fill="#111">{p["ref"]} {p["value"]}</text>')
+                    g.append(f'<text x="{bxp}" y="{byp - 11}" font-size="9" font-weight="bold" text-anchor="middle" fill="#111">{p["ref"]}</text>')
                 g.append("</g>")
                 o += g
                 continue
@@ -626,7 +628,7 @@ def svg(parts, pinmap, wires, jumps, mirror):
                 for (a, b) in pts:
                     g.append(f'<rect x="{a - 3}" y="{b - 3}" width="6" height="6" fill="#d4af37"/>')
             if not mirror:
-                lab = f'{p["ref"]} {p["value"]}'
+                lab = p["ref"]
                 if horiz:
                     g.append(f'<text x="{cx}" y="{cy - h_ / 2 - 3}" font-size="9" text-anchor="middle" fill="#111">{lab}</text>')
                 else:
@@ -645,7 +647,7 @@ def svg(parts, pinmap, wires, jumps, mirror):
                 g.append(f'<text x="{nx_}" y="{(y0 + y1_) / 2 + 4}" font-size="10" fill="#fff" text-anchor="middle" '
                          f'transform="rotate(-90 {nx_} {(y0 + y1_) / 2})">LM393</text>')
                 ty = y0 - 18 if top else y1_ + 26
-                g.append(f'<text x="{nx_}" y="{ty}" font-size="9" text-anchor="middle">U1 (Kerbe {"oben" if top else "unten"}, Pin 1 ●)</text>')
+                g.append(f'<text x="{nx_}" y="{ty}" font-size="9" font-weight="bold" text-anchor="middle">U1</text>')
                 for (a, b), (_, _, _, lbl) in zip(pts, p["pins"]):
                     side = -1 if a == x0 else 1
                     g.append(f'<text x="{a + side * 9}" y="{b + 3}" font-size="8" text-anchor="{"end" if side < 0 else "start"}" fill="#111">{lbl}</text>')
@@ -718,6 +720,16 @@ def svg(parts, pinmap, wires, jumps, mirror):
     for n in notes:
         o.append(f'<text x="{lx}" y="{yy}" font-size="9.5" fill="#222">• {n}</text>')
         yy += 14
+    # Bauteilliste (Beschriftung im Plan nur mit Referenz)
+    yy += 8
+    o.append(f'<text x="{lx}" y="{yy}" font-size="11" font-weight="bold">Bauteile</text>')
+    yy += 15
+    items = [f"{p['ref']} {p['value']}" + (" (stehend)" if p.get("upright") else "")
+             for p in parts if p["kind"] != "esp"]
+    items.sort(key=lambda t: (t[0], int("".join(c for c in t.split()[0][1:] if c.isdigit()) or 0)))
+    for i in range(0, len(items), 3):
+        o.append(f'<text x="{lx}" y="{yy}" font-size="9.5" fill="#222">{"   ·   ".join(items[i:i + 3])}</text>')
+        yy += 13
     o.append("</svg>")
     return "\n".join(o)
 
