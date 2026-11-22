@@ -33,25 +33,24 @@ Einstellungen in EMS-ESP:
 Quelle: EMS-ESP-Doku „Configuring“, Tabelle der Board-Profile (C3MINI: RX 4, TX 5), Build-Ziele in
 `platformio.ini` des EMS-ESP32-Repos.
 
-## Bekannte Eckdaten des Referenzdesigns (bbqkees EMS-Wiki)
+## Eckdaten des Referenzdesigns (bbqkees EMS-Wiki) und was davon übernommen wurde
 
-- **Eingang:** Brückengleichrichter, daher ist die Polung des Busses egal. Zwei optionale Polyfuses (~300 mA)
-  in den Buszuleitungen.
-- **Empfang (RX):** Komparator LM393 an **3V3**, 100 nF Abblockkondensator direkt am IC.
-  Für Read-only reicht der RX-Teil plus dieser Kondensator.
-- **Senden (TX):** NPN-Transistor schaltet eine Last über den Bus. Die Last muss **210–250 Ω** haben,
-  z. B. ein einzelner Widerstand mit 1 W und ~250 Ω statt 4 parallel geschalteter.
-- **Dioden:** BAT46 überall statt BAT54S, laut Autor geht notfalls auch 1N4148.
-- **Induktivitäten:** 4,7 µH. Im Schaltplan steht fälschlich „4,7mH“.
-- **U_REF:** alle U_REF-Netze miteinander verbinden.
-- **Optional:** Optokoppler auf der Logikseite zur galvanischen Trennung.
+- **Eingang:** Brückengleichrichter, daher ist die Polung des Busses egal. *Übernommen* (4× BAT46).
+  Die optionalen Polyfuses und die Entstördrosseln (laut bbqkees 4,7 µH statt der im Plan stehenden „4,7mH“)
+  entfallen hier, siehe `schaltplan.md`, Abschnitt 1a.
+- **Empfang (RX):** Komparator LM393 an **3V3**, 100 nF Abblockkondensator direkt am IC. *Übernommen.*
+- **Senden (TX):** NPN-Transistor schaltet eine Last über den Bus. Die Last muss **210–250 Ω** haben.
+  *Übernommen* als ein einzelner Widerstand 220 Ω 1 W statt 4× 910 Ω parallel.
+- **Dioden:** BAT46 statt BAT54S, laut Autor geht notfalls auch 1N4148.
+- **U_REF:** alle U_REF-Netze miteinander verbinden. *Übernommen.*
+- **Optional:** Optokoppler auf der Logikseite zur galvanischen Trennung. *Nicht verwendet.*
 - **Service-Buchse:** deren 12-V-Pin nicht anschließen. Nicht gleichzeitig an Schraubklemme und
-  Service-Buchse anklemmen.
+  Service-Buchse anklemmen. Hier wird ohnehin am RC310-Sockel angeschlossen.
 
 ## Ablauf
 
-1. Komplette Platine (RX + TX, JP1 gezogen) aufbauen und mit dem Multimeter prüfen: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und
-   nie über 3,3 V.
+1. Komplette Platine (RX + TX, JP1 gezogen) nach `schaltplan.md` aufbauen und prüfen (Abschnitt 5): erst Durchgang
+   ohne ESP32, dann mit ESP32: `RX_OUT` liegt im Ruhezustand bei ~3,3 V und nie darüber.
 2. EMS-ESP flashen (Variante `c3_mini_4M`), Board-Profil **C3MINI** wählen, **Read only** aktivieren.
 3. An den RC310-Sockel parallel anklemmen (siehe `anschluss.md`) und die Geräteliste prüfen.
 4. Erst danach JP1 stecken und Read only abschalten.

@@ -27,3 +27,7 @@ im Artikel kontrollieren.
 | 2 | Buchsenleiste 1×8, RM 2,54 | `Buchsenleiste 8pol` | Sockel für ESP32-C3 Super Mini |
 | – | Lochrasterplatine 5 × 7 cm | – | schon vorhanden |
 | – | Schaltdraht verzinnt 0,6 mm + isolierter Draht | `Schaltdraht` | Lötseite + Brücken |
+| 1 | 2-adriges Kabel, z. B. J-Y(St)Y 2×2×0,6 oder Klingeldraht | `J-Y(St)Y 2x2x0,6` | Gateway ↔ RC310-Sockel |
+| 2 | Zwillings-Aderendhülsen 0,5 mm² | `Zwillingsaderendhülse 0,5` | zweite Ader in die Sockelklemmen |
+| – | USB-C-Netzteil 5 V | – | Versorgung des ESP32-C3, meist vorhanden |
+| – | ESP32-C3 Super Mini | – | schon vorhanden |

@@ -172,7 +172,7 @@ def build(place):
         for c in cells:
             body[c] = ref
         parts.append(dict(kind=kind, ref=ref, value=value, pins=abs_pins, upright=place[ref][2] >= 4))
-    parts.append(dict(kind="esp", ref="ESP", value="ESP32 DevKit V1", pins=esp_pins()))
+    parts.append(dict(kind="esp", ref="ESP", value="ESP32-C3 Super Mini", pins=esp_pins()))
     return parts, set(body)
 
 

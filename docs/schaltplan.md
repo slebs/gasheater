@@ -1,4 +1,4 @@
-# EMS-Interface: Schaltplan, Stückliste und Aufbau (ESP32, 3,3 V)
+# EMS-Interface: Schaltplan, Stückliste und Aufbau (ESP32-C3, 3,3 V)
 
 Vorlage ist der Schaltplan „EMSBus-UART-Converter“. Das ist das bekannte, aus einem Buderus-Servicekey
 nachgebaute Design, das auch im bbqkees EMS-Wiki verwendet wird.
@@ -85,7 +85,8 @@ Netznamen: `L1`/`L2` = Busleitungen (direkt an J1), `VBUS` = Plus nach dem Gleic
 | — | | LM393 **Pin 4** (GND) | ESP32 **GND** |
 | C6 | 100 nF | Pin 8 | Pin 4 | so nah wie möglich am IC |
 
-**LM393-Pinout (DIP-8, Kerbe oben links = Pin 1):**
+**LM393-Pinout (DIP-8, Kerbe oben, Punkt = Pin 1).** Im Lochraster-Plan ist der IC um 180° gedreht
+(Kerbe unten). Bitte genau wie im Plan einsetzen.
 
 ```
         ┌──∪──┐
@@ -97,6 +98,7 @@ IN+ A 3 │     │ 6 IN− B
 ```
 
 **BC547B (TO-92):** flache Seite zu dir, Beine nach unten, von links nach rechts **C – B – E**.
+Im Lochraster-Plan zeigt die flache Seite nach oben; die Pins C/B/E sind dort beschriftet.
 Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest prüfen.
 
 ---
@@ -124,7 +126,8 @@ Bei Nachbauten anderer Hersteller vorher mit dem Datenblatt bzw. dem Diodentest 
 | 1 | Stiftleiste 2-pol. + Jumper | | JP1 (TX ein/aus) |
 | 1 | Schraubklemme | 2-polig, RM 5,08 | Busanschluss |
 | 2 | Buchsenleiste | 1×8 | ESP32-C3 steckbar |
-| 1 | Lochrasterplatine | ca. 7×9 cm | |
+| 1 | Lochrasterplatine | 5 × 7 cm (18 × 24 Löcher) | vorhanden |
+| – | Schaltdraht | verzinnt 0,6 mm + isolierter Draht | Lötseite + Drahtbrücken |
 | – | Kabel | 2-adrig, z. B. J-Y(St)Y 2×2×0,6 | Gateway ↔ RC310-Sockel |
 
 Die Kosten liegen bei ca. 5–8 € plus Versand, z. B. bei Reichelt oder in einem Sortimentskasten.
@@ -146,11 +149,11 @@ Damit TX beim ersten Test trotzdem sicher aus ist, gibt es **zwei Sicherungen**:
 Ablauf: zuerst mit **gezogenem Jumper und Read only** testen. Wenn Telegramme ankommen, den Jumper stecken
 und Read only ausschalten.
 
-Zusätzliches Bauteil: 1× Stiftleiste 2-polig + 1× Jumper (JP1).
-
 ## 5. Prüfen vor dem ersten Anschluss
 
-**Ohne Bus**, nur mit dem ESP32 per USB versorgt:
+**Zuerst ohne ESP32:** jedes Netz mit dem Durchgangsprüfer prüfen (siehe Abschnitt 8).
+
+**Dann ohne Bus**, ESP32-C3 gesteckt und per USB versorgt:
 1. Pin 8 gegen Pin 4 ≈ **3,3 V**.
 2. RX_OUT (GPIO4) ≈ **3,3 V** und **niemals mehr**.
 3. Kein Kurzschluss zwischen den Busklemmen. Mit dem Ohmmeter messen; der Wert sollte im kΩ-Bereich liegen.
@@ -199,8 +202,12 @@ links auf der Bauteilseite, die Achsen sind beschriftet. Die USB-C-Buchse des Su
 
 Wenn eins davon nicht passt: Bescheid geben, dann wird der Plan angepasst.
 
-**Platzsparend:** Einige Widerstände und Dioden stehen (im Plan als Kreis). Der Körper sitzt auf dem Loch mit
-dem Kreis, der Draht wird zurückgebogen und kommt ins Nachbarloch. Bei der stehenden Diode ist das Loch mit „K“ die Kathode.
+**Platzsparend:** R5 steht senkrecht (im Plan als Kreis). Der Körper sitzt auf dem Loch mit dem Kreis, der
+Draht wird zurückgebogen und kommt ins Nachbarloch. Das Skript kann bei Bedarf auch weitere Widerstände und Dioden
+stehend setzen; bei einer stehenden Diode ist das mit „K“ markierte Loch die Kathode.
+
+**Gedrehte Bauteile:** Die Kerbe von U1 (LM393) zeigt nach unten, die flache Seite von Q1 nach oben. Beides wie
+gezeichnet einbauen; Pin 1 bzw. C/B/E sind im Plan markiert.
 
 **Drahtbrücken auf der Bauteilseite** (isolierter Draht, gerade, im Plan als Bogen gezeichnet):
 
