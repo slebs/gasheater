@@ -18,8 +18,8 @@ an den RC310, der weiter regelt.
 ## Lösung: Gateway im Selbstbau
 
 - **Mikrocontroller:** ESP32-C3 Super Mini mit der Firmware EMS-ESP (Build `c3_mini_4M`, Board-Profil `C3MINI`)
-- **Bus-Interface:** Nachbau des bekannten EMS-Interfaces (LM393 + BC547), angepasst auf 3,3 V und
-  vereinfacht. Alles sitzt auf einer Lochrasterplatine 5 × 7 cm.
+- **Bus-Interface:** Nachbau des bekannten EMS-Interfaces, angepasst auf 3,3 V und vereinfacht. Statt des
+  LM393 arbeiten nur Transistoren (1× BC547B, 4× BC548B). Alles sitzt auf einer Lochrasterplatine 7 × 9 cm.
 - **Anschluss:** parallel an die zwei BUS-Schraubklemmen im Wandsockel des RC310 (Kleinspannung, ohne
   Eingriff in die Station)
 
@@ -29,6 +29,7 @@ an den RC310, der weiter regelt.
 |---|---|
 | [`docs/selbstbau.md`](docs/selbstbau.md) | Überblick Selbstbau: Hardware, Pinbelegung, EMS-ESP-Einstellungen, Ablauf |
 | [`docs/schaltplan.md`](docs/schaltplan.md) | Schaltung, Netzliste, Stückliste, Aufbau, Prüfung, Lochraster-Plan |
+| [`docs/schaltplan_transistor.svg`](docs/schaltplan_transistor.svg) | Schaltplan als Grafik (BC547/BC548) |
 | [`docs/lochraster_c3_bestueckung.svg`](docs/lochraster_c3_bestueckung.svg) | Lochraster-Plan, Bauteilseite |
 | [`docs/lochraster_c3_loetseite.svg`](docs/lochraster_c3_loetseite.svg) | Lochraster-Plan, Lötseite (gespiegelt) |
 | [`docs/bestellliste.md`](docs/bestellliste.md) | Bestellliste mit Suchbegriffen |
@@ -51,6 +52,6 @@ an den RC310, der weiter regelt.
 
 ## Offene Punkte vor dem Löten
 
-- Lochrasterplatine wirklich 18 × 24 Löcher?
+- Lochrasterplatine wirklich 24 × 30 Löcher?
 - Stiftreihen des Super Mini 6 Raster (15,24 mm) auseinander?
 - Pinbeschriftung des Super Mini wie im Plan?

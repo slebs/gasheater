@@ -1,0 +1,286 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" font-family="Helvetica,Arial,sans-serif"><rect width="100%" height="100%" fill="#fff"/><text x="30" y="32" font-size="20" text-anchor="start" font-weight="bold" fill="#111">EMS-Bus-Interface für ESP32-C3 – diskret mit BC547/BC548 (ohne LM393)</text>
+<rect x="20" y="48" width="260" height="450" fill="none" stroke="#9ca3af" stroke-dasharray="6 4" rx="6"/>
+<text x="272" y="490" font-size="12" text-anchor="end" font-weight="bold" fill="#6b7280">Eingang</text>
+<rect x="290" y="48" width="900" height="450" fill="none" stroke="#9ca3af" stroke-dasharray="6 4" rx="6"/>
+<text x="1182" y="490" font-size="12" text-anchor="end" font-weight="bold" fill="#6b7280">RX: Differenzstufe + Pegelwandler</text>
+<rect x="20" y="530" width="800" height="350" fill="none" stroke="#9ca3af" stroke-dasharray="6 4" rx="6"/>
+<text x="812" y="872" font-size="12" text-anchor="end" font-weight="bold" fill="#6b7280">TX: Inverter + Stromsenke</text>
+<circle cx="60" cy="180" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="46" y="184" font-size="12" text-anchor="end" font-weight="normal" fill="#111">1</text>
+<circle cx="60" cy="390" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="46" y="394" font-size="12" text-anchor="end" font-weight="normal" fill="#111">2</text>
+<text x="42" y="280" font-size="13" text-anchor="end" font-weight="bold" fill="#111">J1</text>
+<text x="42" y="296" font-size="11" text-anchor="end" font-weight="normal" fill="#111">EMS</text>
+<polyline points="67,180 180,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="67,390 240,390" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="110" cy="180" r="4" fill="#111"/>
+<circle cx="110" cy="390" r="4" fill="#111"/>
+<polyline points="110,180 110,280.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="110,290.0 110,390" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="96,280.0 124,280.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="96,290.0 124,290.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="128" y="282.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">C1</text>
+<text x="128" y="298.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">68p</text>
+<circle cx="180" cy="180" r="4" fill="#111"/>
+<circle cx="240" cy="390" r="4" fill="#111"/>
+<polyline points="180,180 180,134.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="180,116.0 180,70" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="170,134.0 190,134.0 180,116.0" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="170,116.0 190,116.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="164" y="123.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">D1</text>
+<text x="164" y="138.0" font-size="11" text-anchor="end" font-weight="normal" fill="#111">BAT46</text>
+<polyline points="180,470 180,334.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="180,316.0 180,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="170,334.0 190,334.0 180,316.0" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="170,316.0 190,316.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="164" y="323.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">D2</text>
+<text x="164" y="338.0" font-size="11" text-anchor="end" font-weight="normal" fill="#111">BAT46</text>
+<polyline points="240,390 240,239.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="240,221.0 240,70" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="230,239.0 250,239.0 240,221.0" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="230,221.0 250,221.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="256" y="228.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">D3</text>
+<text x="256" y="243.0" font-size="11" text-anchor="start" font-weight="normal" fill="#111">BAT46</text>
+<polyline points="240,470 240,439.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="240,421.0 240,390" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="230,439.0 250,439.0 240,421.0" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="230,421.0 250,421.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="256" y="428.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">D4</text>
+<text x="256" y="443.0" font-size="11" text-anchor="start" font-weight="normal" fill="#111">BAT46</text>
+<polyline points="180,70 788,70" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>
+<text x="300" y="62" font-size="12" text-anchor="start" font-weight="bold" fill="#dc2626">VBUS (12…17 V)</text>
+<polyline points="180,470 1052,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="600,470 600,480" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="588,480 612,480" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="593,485 607,485" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="597,490 603,490" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="616" y="492" font-size="11" text-anchor="start" font-weight="normal" fill="#444">GND = ESP32-GND</text>
+<circle cx="240" cy="70" r="4" fill="#111"/>
+<circle cx="320" cy="70" r="4" fill="#111"/>
+<circle cx="642" cy="70" r="4" fill="#111"/>
+<circle cx="788" cy="70" r="4" fill="#111"/>
+<polyline points="320,70 320,113.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="320,157.0 320,200" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="312.0" y="113.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="306.0" y="132.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">R1</text>
+<text x="306.0" y="148.0" font-size="12" text-anchor="end" font-weight="normal" fill="#111">56k</text>
+<circle cx="320" cy="200" r="4" fill="#111"/>
+<polyline points="320,200 320,313.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="320,357.0 320,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="312.0" y="313.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="306.0" y="332.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">R2</text>
+<text x="306.0" y="348.0" font-size="12" text-anchor="end" font-weight="normal" fill="#111">10k</text>
+<polyline points="320,200 460,200" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="380" cy="200" r="4" fill="#111"/>
+<polyline points="380,200 380,330.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="380,340.0 380,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="366,330.0 394,330.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="366,340.0 394,340.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="398" y="332.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">C3</text>
+<text x="398" y="348.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">1n</text>
+<circle cx="460" cy="200" r="4" fill="#111"/>
+<text x="400" y="192" font-size="13" text-anchor="start" font-weight="bold" fill="#1d4ed8">SIG</text>
+<polyline points="460,200 460,243.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="460,287.0 460,330" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="452.0" y="243.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="474.0" y="262.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R3</text>
+<text x="474.0" y="278.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">15k</text>
+<circle cx="460" cy="330" r="4" fill="#111"/>
+<polyline points="460,330 460,378.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="460,422.0 460,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="452.0" y="378.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="474.0" y="397.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R4</text>
+<text x="474.0" y="413.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">220k</text>
+<polyline points="460,330 580,330" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="520" cy="330" r="4" fill="#111"/>
+<polyline points="520,330 520,395.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="520,405.0 520,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="506,395.0 534,395.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="506,405.0 534,405.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="500" y="392.0" font-size="13" text-anchor="middle" font-weight="bold" fill="#111">+</text>
+<text x="538" y="397.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">C2</text>
+<text x="538" y="413.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">10µ</text>
+<text x="528" y="322" font-size="13" text-anchor="start" font-weight="bold" fill="#7c3aed">REF</text>
+<circle cx="320" cy="470" r="4" fill="#111"/>
+<circle cx="380" cy="470" r="4" fill="#111"/>
+<circle cx="460" cy="470" r="4" fill="#111"/>
+<circle cx="520" cy="470" r="4" fill="#111"/>
+<circle cx="630" cy="260" r="24" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="600,260 622,260" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="622,246 622,274" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="622,254 642,240 642,220" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="622,266 642,280 642,300" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="640,278.5 631,277.5 636,270.5" fill="#111"/>
+<text x="660" y="256" font-size="13" text-anchor="start" font-weight="bold" fill="#111">Q3</text>
+<text x="660" y="272" font-size="12" text-anchor="start" font-weight="normal" fill="#111">BC548B</text>
+<text x="646" y="230" font-size="10" text-anchor="start" font-weight="normal" fill="#666">C</text>
+<text x="646" y="296" font-size="10" text-anchor="start" font-weight="normal" fill="#666">E</text>
+<text x="602" y="254" font-size="10" text-anchor="middle" font-weight="normal" fill="#666">B</text>
+<polyline points="580,330 580,260 600,260" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="642,220 642,70" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="800" cy="260" r="24" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="830,260 808,260" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="808,246 808,274" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="808,254 788,240 788,220" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="808,266 788,280 788,300" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="790,278.5 799,277.5 794,270.5" fill="#111"/>
+<text x="770" y="256" font-size="13" text-anchor="end" font-weight="bold" fill="#111">Q2</text>
+<text x="770" y="272" font-size="12" text-anchor="end" font-weight="normal" fill="#111">BC548B</text>
+<text x="784" y="230" font-size="10" text-anchor="end" font-weight="normal" fill="#666">C</text>
+<text x="784" y="296" font-size="10" text-anchor="end" font-weight="normal" fill="#666">E</text>
+<text x="828" y="254" font-size="10" text-anchor="middle" font-weight="normal" fill="#666">B</text>
+<polyline points="830,260 870,260" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="876" y="265" font-size="13" text-anchor="start" font-weight="bold" fill="#1d4ed8">SIG</text>
+<polyline points="642,300 642,330 788,330 788,300" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="715" cy="330" r="4" fill="#111"/>
+<text x="721" y="350" font-size="13" text-anchor="start" font-weight="bold" fill="#0891b2">TAIL</text>
+<polyline points="715,330 715,378.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="715,422.0 715,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="707.0" y="378.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="729.0" y="397.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R5</text>
+<text x="729.0" y="413.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">4k7</text>
+<circle cx="715" cy="470" r="4" fill="#111"/>
+<polyline points="788,220 788,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="788" cy="180" r="4" fill="#111"/>
+<polyline points="788,70 788,103.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="788,147.0 788,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="780.0" y="103.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="802.0" y="122.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R6</text>
+<text x="802.0" y="138.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">33k</text>
+<text x="796" y="172" font-size="13" text-anchor="start" font-weight="bold" fill="#db2777">N</text>
+<polyline points="788,180 880,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="880,180 913.0,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="957.0,180 990,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="913.0" y="172.0" width="44" height="16" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="935.0" y="166.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#111"><tspan font-weight="bold">R7</tspan> 68k</text>
+<circle cx="990" cy="180" r="4" fill="#111"/>
+<text x="950" y="205" font-size="13" text-anchor="start" font-weight="bold" fill="#65a30d">B4</text>
+<polyline points="990,180 990,303.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="990,347.0 990,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="982.0" y="303.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="976.0" y="322.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">R8</text>
+<text x="976.0" y="338.0" font-size="12" text-anchor="end" font-weight="normal" fill="#111">10k</text>
+<circle cx="990" cy="470" r="4" fill="#111"/>
+<circle cx="1040" cy="180" r="24" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="1010,180 1032,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1032,166 1032,194" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1032,174 1052,160 1052,140" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1032,186 1052,200 1052,220" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="1050,198.5 1041,197.5 1046,190.5" fill="#111"/>
+<text x="1070" y="176" font-size="13" text-anchor="start" font-weight="bold" fill="#111">Q4</text>
+<text x="1070" y="192" font-size="12" text-anchor="start" font-weight="normal" fill="#111">BC548B</text>
+<text x="1056" y="150" font-size="10" text-anchor="start" font-weight="normal" fill="#666">C</text>
+<text x="1056" y="216" font-size="10" text-anchor="start" font-weight="normal" fill="#666">E</text>
+<text x="1012" y="174" font-size="10" text-anchor="middle" font-weight="normal" fill="#666">B</text>
+<polyline points="990,180 1010,180" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1052,220 1052,470" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1052,140 1052,130" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1052" cy="130" r="4" fill="#111"/>
+<polyline points="1052,130 1052,79.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1052,123.0 1052,72" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="1044.0" y="79.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="1066.0" y="98.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R9</text>
+<text x="1066.0" y="114.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">4k7</text>
+<polyline points="1052,72 1052,60" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1038,60 1066,60" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<text x="1052" y="54" font-size="12" text-anchor="middle" font-weight="bold" fill="#c2410c">3V3</text>
+<polyline points="1052,130 1130,130" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="1136" y="135" font-size="13" text-anchor="start" font-weight="bold" fill="#15803d">RX_OUT → GPIO4</text>
+<text x="30" y="765" font-size="13" text-anchor="start" font-weight="bold" fill="#ca8a04">GPIO5</text>
+<text x="30" y="781" font-size="11" text-anchor="start" font-weight="normal" fill="#ca8a04">(TX_IN)</text>
+<polyline points="80,760 200,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="200" cy="760" r="4" fill="#111"/>
+<polyline points="200,760 200,664.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="200,708.0 200,612" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="192.0" y="664.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="186.0" y="683.0" font-size="13" text-anchor="end" font-weight="bold" fill="#111">R10</text>
+<text x="186.0" y="699.0" font-size="12" text-anchor="end" font-weight="normal" fill="#111">47k</text>
+<polyline points="200,612 200,600" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="186,600 214,600" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<text x="200" y="594" font-size="12" text-anchor="middle" font-weight="bold" fill="#c2410c">3V3</text>
+<polyline points="200,760 258.0,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="302.0,760 360,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="258.0" y="752.0" width="44" height="16" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="280.0" y="746.0" font-size="12" text-anchor="middle" font-weight="normal" fill="#111"><tspan font-weight="bold">R11</tspan> 10k</text>
+<circle cx="390" cy="760" r="24" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="360,760 382,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="382,746 382,774" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="382,754 402,740 402,720" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="382,766 402,780 402,800" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="400,778.5 391,777.5 396,770.5" fill="#111"/>
+<text x="420" y="756" font-size="13" text-anchor="start" font-weight="bold" fill="#111">Q5</text>
+<text x="420" y="772" font-size="12" text-anchor="start" font-weight="normal" fill="#111">BC548B</text>
+<text x="406" y="730" font-size="10" text-anchor="start" font-weight="normal" fill="#666">C</text>
+<text x="406" y="796" font-size="10" text-anchor="start" font-weight="normal" fill="#666">E</text>
+<text x="362" y="754" font-size="10" text-anchor="middle" font-weight="normal" fill="#666">B</text>
+<polyline points="402,800 402,840" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="402,720 402,700" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="402" cy="700" r="4" fill="#111"/>
+<polyline points="402,700 402,634.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="402,678.0 402,612" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="394.0" y="634.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="416.0" y="653.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R12</text>
+<text x="416.0" y="669.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">2k2</text>
+<polyline points="402,612 402,600" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="388,600 416,600" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+<text x="402" y="594" font-size="12" text-anchor="middle" font-weight="bold" fill="#c2410c">3V3</text>
+<polyline points="402,700 560,700 560,760 590,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="470" y="692" font-size="13" text-anchor="start" font-weight="bold" fill="#9333ea">TXB</text>
+<circle cx="620" cy="760" r="24" fill="#fff" stroke="#111" stroke-width="2"/>
+<polyline points="590,760 612,760" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="612,746 612,774" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="612,754 632,740 632,720" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="612,766 632,780 632,800" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="630,778.5 621,777.5 626,770.5" fill="#111"/>
+<text x="650" y="756" font-size="13" text-anchor="start" font-weight="bold" fill="#111">Q1</text>
+<text x="650" y="772" font-size="12" text-anchor="start" font-weight="normal" fill="#111">BC547B</text>
+<text x="636" y="730" font-size="10" text-anchor="start" font-weight="normal" fill="#666">C</text>
+<text x="636" y="796" font-size="10" text-anchor="start" font-weight="normal" fill="#666">E</text>
+<text x="592" y="754" font-size="10" text-anchor="middle" font-weight="normal" fill="#666">B</text>
+<polyline points="632,800 632,840" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="632,720 632,690" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="632" cy="690" r="4" fill="#111"/>
+<text x="640" y="682" font-size="13" text-anchor="start" font-weight="bold" fill="#b91c1c">TXC</text>
+<polyline points="632,690 632,628.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="632,672.0 632,610" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<rect x="624.0" y="628.0" width="16" height="44" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="646.0" y="647.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">R13</text>
+<text x="646.0" y="663.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">220 Ω 1 W</text>
+<polyline points="632,610 632,598" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="632" cy="592" r="5" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="632" cy="570" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<rect x="622" y="562" width="20" height="38" rx="3" fill="none" stroke="#111" stroke-dasharray="3 2"/>
+<text x="650" y="580" font-size="13" text-anchor="start" font-weight="bold" fill="#111">JP1</text>
+<text x="650" y="595" font-size="11" text-anchor="start" font-weight="normal" fill="#111">TX ein/aus</text>
+<polyline points="632,565 632,556" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="632,556 632,544" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="618,544 646,544" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>
+<text x="632" y="538" font-size="12" text-anchor="middle" font-weight="bold" fill="#dc2626">VBUS</text>
+<polyline points="632,690 720,690" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="720,690 720,760.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="720,770.0 720,840" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="706,760.0 734,760.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="706,770.0 734,770.0" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<text x="738" y="762.0" font-size="13" text-anchor="start" font-weight="bold" fill="#111">C5</text>
+<text x="738" y="778.0" font-size="12" text-anchor="start" font-weight="normal" fill="#111">1,5n</text>
+<polyline points="402,840 720,840" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="560,840 560,850" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="548,850 572,850" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="553,855 567,855" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="557,860 563,860" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="632" cy="840" r="4" fill="#111"/>
+<text x="850" y="560" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111"><tspan font-weight='bold'>Funktion</tspan></text>
+<text x="850" y="579" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">RX: R1/R2 teilen VBUS auf SIG ≈ 0,15 × VBUS.</text>
+<text x="850" y="598" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">R3/R4/C2 bilden die gleitende Referenz REF ≈ 0,94 × Mittel(SIG).</text>
+<text x="850" y="617" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">Ruhe: SIG &gt; REF → Q2 leitet, N ≈ 2,8 V → Q4 sperrt → RX_OUT = 3,3 V.</text>
+<text x="850" y="636" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">Low-Bit (Bus fällt um mehr als ca. 1,0–1,4 V): SIG &lt; REF → Q2 sperrt,</text>
+<text x="850" y="655" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">   N steigt auf 6–10 V → Q4 leitet → RX_OUT ≈ 0 V.</text>
+<text x="850" y="674" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">TX: UART-Ruhe High → Q5 leitet → Q1 sperrt.</text>
+<text x="850" y="693" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">TX Low → Q5 sperrt → R12 schaltet Q1 → ca. 70 mA über R13 aus dem Bus.</text>
+<text x="850" y="712" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">R10 hält Q1 aus, solange der ESP32 bootet oder fehlt.</text>
+<text x="850" y="731" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111"></text>
+<text x="850" y="750" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111"><tspan font-weight='bold'>Hinweise</tspan></text>
+<text x="850" y="769" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">Q1 = BC547B, Q2–Q5 = BC548B (gegeneinander austauschbar).</text>
+<text x="850" y="788" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">TO-92, flache Seite vorne, Beine unten: C – B – E.</text>
+<text x="850" y="807" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">C2 als Elko: Plus an REF.   N und VBUS nie an einen ESP32-Pin!</text>
+<text x="850" y="826" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">Gleichnamige Netzlabels (SIG, 3V3, VBUS) sind verbunden.</text>
+<text x="850" y="845" font-size="12.5" text-anchor="start" font-weight="normal" fill="#111">Busstrom in Ruhe ca. 0,5–0,7 mA.</text></svg>

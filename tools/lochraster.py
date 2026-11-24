@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Lochraster-Layout für das EMS-Interface (ESP32-C3 Super Mini auf Lochraster 5 × 7 cm, 3,3 V).
+"""Lochraster-Layout für das EMS-Interface (ESP32-C3 Super Mini auf Lochraster 7 × 9 cm, 3,3 V),
+diskrete Variante mit BC547/BC548 (ohne LM393).
 
 - Bauteile werden auf einem 2,54-mm-Raster platziert (Platzierung in tools/placement.json,
   per --optimize automatisch verbessert: Simulated Annealing auf minimale Drahtlänge).
@@ -32,7 +33,7 @@ P = 20   # px pro Raster im SVG
 M = 40   # Rand im SVG
 
 # ------------------------------------------------------------------ Board / ESP32-C3 Super Mini
-W, H = 18, 24           # Lochrasterplatine 5 × 7 cm = 18 × 24 Löcher
+W, H = 24, 30           # Lochrasterplatine 7 × 9 cm = 24 × 30 Löcher
 OFF = 0                 # Platzierung absolut
 EX0, GAP = 0, 6         # Super Mini: Stiftreihen 6 Raster = 15,24 mm auseinander
 EX1 = EX0 + GAP
@@ -40,7 +41,7 @@ EY0 = 1                 # erste Stiftreihe; USB-C ragt über den oberen Rand hin
 # Pinbelegung, Draufsicht, USB-C oben (Beschriftung auf dem Board: links 5…21, rechts 5V/G/3V/4…0)
 ESP_L = ["IO5", "IO6", "IO7", "IO8", "IO9", "IO10", "IO20", "IO21"]
 ESP_R = ["5V", "GND", "3V3", "IO4", "IO3", "IO2", "IO1", "IO0"]
-ESP_USE = {"IO4": "RXO", "IO5": "P6", "GND": "GND", "3V3": "VCC"}   # EMS-ESP Profil C3MINI: RX 4, TX 5
+ESP_USE = {"IO4": "RXO", "IO5": "TXI", "GND": "GND", "3V3": "VCC"}   # EMS-ESP Profil C3MINI: RX 4, TX 5
 # Sperrfläche für Bauteile (das Modul steckt auf Buchsenleisten darüber). Leitungen darunter sind erlaubt.
 KEEP_BODY = {(x, y) for x in range(EX0, EX1 + 1) for y in range(0, EY0 + 8)}
 
@@ -61,7 +62,7 @@ ALLOWED_R = {"dip8": (0, 2), "to92": (0, 2), "terminal": (0,),
              "res": tuple(range(8)), "diode": tuple(range(8))}
 UPRIGHT = {"res": [(0, 0), (1, 0)], "diode": [(0, 0), (1, 0)]}
 
-# ref: (kind, value, [(net, pinlabel), ...])
+# ref: (kind, value, [(net, pinlabel), ...])   TO-92: Pins in der Reihenfolge C, B, E
 PARTS = {
     "J1": ("terminal", "EMS-Bus", [("NL1", "1"), ("NL2", "2")]),
     "C1": ("ccap", "68p", [("NL1", ""), ("NL2", "")]),
@@ -69,44 +70,51 @@ PARTS = {
     "D2": ("diode", "BAT46", [("GND", "A"), ("NL1", "K")]),
     "D3": ("diode", "BAT46", [("NL2", "A"), ("VBUS", "K")]),
     "D4": ("diode", "BAT46", [("GND", "A"), ("NL2", "K")]),
-    "R1": ("res", "10k", [("VBUS", ""), ("NA", "")]),
-    "R2": ("res", "360R", [("NA", ""), ("UREF", "")]),
-    "D6": ("diode", "1N4148", [("UREF", "A"), ("GND", "K")]),
-    "C2": ("ccap", "10µ", [("NA", ""), ("P3", "")]),
-    "C3": ("ccap", "1n", [("NA", ""), ("P2", "")]),
-    "R3": ("res", "47k", [("UREF", ""), ("P3", "")]),
-    "R4": ("res", "10k", [("UREF", ""), ("P2", "")]),
-    "R5": ("res", "100k", [("P2", ""), ("GND", "")]),
-    "U1": ("dip8", "LM393", [("P1", "1"), ("P2", "2"), ("P3", "3"), ("GND", "4"),
-                             ("UREF", "5"), ("P6", "6"), ("P7", "7"), ("VCC", "8")]),
-    "C6": ("ccap", "100n", [("VCC", ""), ("GND", "")]),
-    "R6": ("res", "4k7", [("VCC", ""), ("P1", "")]),
-    "R7": ("res", "4k7", [("P1", ""), ("RXO", "")]),
-    "C4": ("ccap", "10n", [("P6", ""), ("GND", "")]),
-    "R8": ("res", "4k7", [("VCC", ""), ("P7", "")]),
-    "Q1": ("to92", "BC547B", [("TXC", "C"), ("P7", "B"), ("GND", "E")]),
+    # RX: Spannungsteiler, gleitende Referenz, Differenzstufe Q2/Q3, Pegelwandler Q4
+    "R1": ("res", "56k", [("VBUS", ""), ("SIG", "")]),
+    "R2": ("res", "10k", [("SIG", ""), ("GND", "")]),
+    "C3": ("ccap", "1n", [("SIG", ""), ("GND", "")]),
+    "R3": ("res", "15k", [("SIG", ""), ("REF", "")]),
+    "R4": ("res", "220k", [("REF", ""), ("GND", "")]),
+    "C2": ("ccap", "10µ", [("REF", ""), ("GND", "")]),
+    "Q2": ("to92", "BC548B", [("N", "C"), ("SIG", "B"), ("TAIL", "E")]),
+    "Q3": ("to92", "BC548B", [("VBUS", "C"), ("REF", "B"), ("TAIL", "E")]),
+    "R5": ("res", "4k7", [("TAIL", ""), ("GND", "")]),
+    "R6": ("res", "33k", [("VBUS", ""), ("N", "")]),
+    "R7": ("res", "68k", [("N", ""), ("B4", "")]),
+    "R8": ("res", "10k", [("B4", ""), ("GND", "")]),
+    "Q4": ("to92", "BC548B", [("RXO", "C"), ("B4", "B"), ("GND", "E")]),
+    "R9": ("res", "4k7", [("VCC", ""), ("RXO", "")]),
+    # TX: Inverter Q5, Stromsenke Q1 über R13 (220 Ω) und JP1
+    "R10": ("res", "47k", [("VCC", ""), ("TXI", "")]),
+    "R11": ("res", "10k", [("TXI", ""), ("B5", "")]),
+    "Q5": ("to92", "BC548B", [("TXB", "C"), ("B5", "B"), ("GND", "E")]),
+    "R12": ("res", "2k2", [("VCC", ""), ("TXB", "")]),
+    "Q1": ("to92", "BC547B", [("TXC", "C"), ("TXB", "B"), ("GND", "E")]),
     "JP1": ("jumper", "TX ein", [("VBUS", "1"), ("JPX", "2")]),
-    "R9": ("res1w", "220R 1W", [("JPX", ""), ("TXC", "")]),
+    "R13": ("res1w", "220R 1W", [("JPX", ""), ("TXC", "")]),
     "C5": ("ccap", "1,5n", [("TXC", ""), ("GND", "")]),
 }
 
-# Soll-Netzliste (aus docs/schaltplan.md, vereinfachte Variante ohne L1/L2/D5)
+# Soll-Netzliste (aus docs/schaltplan.md, diskrete Variante)
 EXPECTED = {
     "NL1": {"J1.1", "C1.1", "D1.A", "D2.K"},
     "NL2": {"J1.2", "C1.2", "D3.A", "D4.K"},
-    "VBUS": {"D1.K", "D3.K", "R1.1", "JP1.1"},
-    "GND": {"D2.A", "D4.A", "D6.K", "R5.2", "U1.4", "C6.2", "C4.2", "Q1.E", "C5.2", "ESP.GND"},
-    "NA": {"R1.2", "R2.1", "C2.1", "C3.1"},
-    "UREF": {"R2.2", "D6.A", "R3.1", "R4.1", "U1.5"},
-    "P3": {"C2.2", "R3.2", "U1.3"},
-    "P2": {"C3.2", "R4.2", "R5.1", "U1.2"},
-    "P1": {"U1.1", "R6.2", "R7.1"},
-    "RXO": {"R7.2", "ESP.IO4"},
-    "VCC": {"U1.8", "C6.1", "R6.1", "R8.1", "ESP.3V3"},
-    "P6": {"U1.6", "C4.1", "ESP.IO5"},
-    "P7": {"U1.7", "R8.2", "Q1.B"},
-    "TXC": {"Q1.C", "R9.2", "C5.1"},
-    "JPX": {"JP1.2", "R9.1"},
+    "VBUS": {"D1.K", "D3.K", "R1.1", "Q3.C", "R6.1", "JP1.1"},
+    "GND": {"D2.A", "D4.A", "R2.2", "C3.2", "R4.2", "C2.2", "R5.2", "R8.2", "Q4.E", "Q5.E", "Q1.E",
+            "C5.2", "ESP.GND"},
+    "SIG": {"R1.2", "R2.1", "C3.1", "R3.1", "Q2.B"},
+    "REF": {"R3.2", "R4.1", "C2.1", "Q3.B"},
+    "TAIL": {"Q2.E", "Q3.E", "R5.1"},
+    "N": {"Q2.C", "R6.2", "R7.1"},
+    "B4": {"R7.2", "R8.1", "Q4.B"},
+    "RXO": {"Q4.C", "R9.2", "ESP.IO4"},
+    "VCC": {"R9.1", "R10.1", "R12.1", "ESP.3V3"},
+    "TXI": {"R10.2", "R11.1", "ESP.IO5"},
+    "B5": {"R11.2", "Q5.B"},
+    "TXB": {"Q5.C", "R12.2", "Q1.B"},
+    "TXC": {"Q1.C", "R13.2", "C5.1"},
+    "JPX": {"JP1.2", "R13.1"},
 }
 NETS = sorted(EXPECTED)
 
@@ -355,8 +363,8 @@ def initial_placement():
     # Greedy: Bauteile nacheinander an die gültige Stelle mit kleinster Netz-Spannweite setzen
     rnd = random.Random(3)
     place = {}
-    order = ["U1", "C6", "R6", "R7", "C4", "R8", "Q1", "C5", "R9", "JP1", "R3", "R4", "R5", "C2", "C3",
-             "R2", "D6", "R1", "D1", "D2", "D3", "D4", "C1", "J1"]
+    order = ["Q2", "Q3", "R5", "R6", "R7", "R8", "Q4", "R9", "R3", "R4", "C2", "R1", "R2", "C3",
+             "R10", "R11", "Q5", "R12", "Q1", "R13", "JP1", "C5", "D1", "D2", "D3", "D4", "C1", "J1"]
     global PARTS
     full = PARTS
     for ref in order:
@@ -518,17 +526,18 @@ def merge_jumps(wires, jumps):
 
 # ------------------------------------------------------------------ SVG
 COL = {
-    "GND": "#1f2937", "VBUS": "#dc2626", "VCC": "#ea580c", "UREF": "#7c3aed", "NA": "#0891b2",
-    "P1": "#16a34a", "P2": "#2563eb", "P3": "#db2777", "RXO": "#15803d", "P6": "#ca8a04",
-    "P7": "#9333ea", "TXC": "#b91c1c", "NL1": "#0d9488", "NL2": "#4f46e5", "JPX": "#be123c",
+    "GND": "#1f2937", "VBUS": "#dc2626", "VCC": "#ea580c", "SIG": "#2563eb", "REF": "#7c3aed",
+    "TAIL": "#0891b2", "N": "#db2777", "B4": "#65a30d", "RXO": "#15803d", "TXI": "#ca8a04",
+    "B5": "#a16207", "TXB": "#9333ea", "TXC": "#b91c1c", "NL1": "#0d9488", "NL2": "#4f46e5", "JPX": "#be123c",
 }
 NETNAME = {
-    "GND": "GND", "VBUS": "VBUS (+12…17 V)", "VCC": "3V3", "UREF": "U_REF (≈0,6 V)", "NA": "Knoten NA",
-    "P1": "LM393 Pin 1 (OUT A)", "P2": "LM393 Pin 2", "P3": "LM393 Pin 3", "RXO": "RX_OUT → IO4",
-    "P6": "TX_IN ← IO5 (Pin 6)", "P7": "LM393 Pin 7 / Basis Q1", "TXC": "Kollektor Q1",
-    "NL1": "Bus-Leitung 1", "NL2": "Bus-Leitung 2", "JPX": "JP1 → R9",
+    "GND": "GND", "VBUS": "VBUS (+12…17 V)", "VCC": "3V3", "SIG": "Signal (Teiler R1/R2, Basis Q2)",
+    "REF": "Referenz (C2, Basis Q3)", "TAIL": "Emitter Q2/Q3", "N": "Kollektor Q2", "B4": "Basis Q4",
+    "RXO": "RX_OUT → IO4", "TXI": "TX_IN ← IO5", "B5": "Basis Q5", "TXB": "Kollektor Q5 / Basis Q1",
+    "TXC": "Kollektor Q1", "NL1": "Bus-Leitung 1", "NL2": "Bus-Leitung 2", "JPX": "JP1 → R13",
 }
-ORDER = ["GND", "VBUS", "VCC", "UREF", "NA", "P2", "P3", "P1", "RXO", "P6", "P7", "TXC", "NL1", "NL2", "JPX"]
+ORDER = ["GND", "VBUS", "VCC", "SIG", "REF", "TAIL", "N", "B4", "RXO", "TXI", "B5", "TXB", "TXC",
+         "NL1", "NL2", "JPX"]
 
 
 def svg(parts, pinmap, wires, jumps, mirror):
@@ -661,7 +670,7 @@ def svg(parts, pinmap, wires, jumps, mirror):
             if not mirror:
                 for (a, b), (_, _, _, lbl) in zip(pts, p["pins"]):
                     g.append(f'<text x="{a}" y="{b + (17 if fs > 0 else -11)}" font-size="8" text-anchor="middle">{lbl}</text>')
-                g.append(f'<text x="{x0 - 10}" y="{y0 + 3}" font-size="9" text-anchor="end">Q1</text>')
+                g.append(f'<text x="{x0 - 10}" y="{y0 + 3}" font-size="9" text-anchor="end">{p["ref"]}</text>')
         elif k == "terminal":
             x0, x1_ = min(xs), max(xs)
             y0, y1_ = min(ys), max(ys)
@@ -709,11 +718,11 @@ def svg(parts, pinmap, wires, jumps, mirror):
         "Unter dem Modul dürfen Leitungen (Lötseite) liegen, keine Bauteile.",
         "Dioden: schwarzer Ring = Kathode (bei stehenden: Pin „K“).",
         "Kreis = stehend eingebaut: Körper sitzt auf diesem Loch, Draht zum Nachbarloch.",
-        "U1: Kerbe/Punkt = Pin 1 wie gezeichnet. Sockel verwenden!",
-        "Q1 BC547B: flache Seite wie gezeichnet, Pins C/B/E beschriftet.",
+        "Transistoren: flache Seite wie gezeichnet, Pins C/B/E beschriftet.",
+        "Q1 = BC547B, Q2–Q5 = BC548B (beide Typen austauschbar).",
         "JP1 gezogen = TX aus (nur Mitlesen).",
-        "R9 = 220 Ω 1 W (oder 4×910 Ω parallel).",
-        "C2 10 µF: Keramik. Elko: Plus an den NA-Pin.",
+        "R13 = 220 Ω 1 W (oder 4×910 Ω parallel).",
+        "C2 10 µF: Keramik. Elko: Plus an REF (Basis Q3), Minus an GND.",
         "Gebogene Linien = isolierte Drahtbrücke auf der Bauteilseite.",
         "Vor Inbetriebnahme: Durchgangsprüfung jedes Netzes.",
     ]
